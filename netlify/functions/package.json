@@ -1,0 +1,9 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for HVV departures",
+  "main": "hvv-departures.js",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
