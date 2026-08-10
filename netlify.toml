@@ -1,0 +1,16 @@
+[build]
+  command = "echo 'No build needed'"
+  publish = "."
+  functions = "netlify/functions"
+
+[dev]
+  port = 8888
+  framework = "static"
+
+[[redirects]]
+  from = "/*"
+  to = "/kuechen-dashboard.html"
+  status = 200
+
+[[plugins]]
+package = "@netlify/plugin-functions-install-core"
