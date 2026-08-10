@@ -1,0 +1,8 @@
+{
+  "name": "kuechen-dashboard",
+  "version": "1.0.0",
+  "description": "Küchen Dashboard mit HVV",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
