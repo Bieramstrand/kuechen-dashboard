@@ -803,11 +803,11 @@
   // Aktions-Übersicht aktualisieren
   async function updateActionsOverview() {
     try {
-      // Einkaufsliste
-      const shopping = await window.storage.get('household:shopping', true);
+      // Einkaufsliste (aus dem Einkaufszettel-Projekt)
+      const shopping = await window.storage.get('shoppingapp:items', true);
       if (shopping) {
         const shopData = JSON.parse(shopping.value);
-        const openCount = shopData.filter(i => !i.done).length;
+        const openCount = shopData.filter((i) => !i.checked).length;
         document.getElementById('shoppingCount').textContent = openCount;
       } else {
         document.getElementById('shoppingCount').textContent = '0';
