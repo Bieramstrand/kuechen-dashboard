@@ -105,7 +105,7 @@ exports.handler = async (event, context) => {
           destination: (dep.line && dep.line.direction) || dep.direction || 'Ohlsdorf',
           minToDepart: dep.timeOffset != null ? dep.timeOffset : null,
           time: plannedTime
-            ? plannedTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            ? plannedTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
             : null,
           delay: dep.delay ? Math.round(dep.delay / 60) : 0,
           cancelled: !!dep.cancelled,
