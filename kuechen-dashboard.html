@@ -542,6 +542,12 @@
         event.dtend = parseICSDate(value);
       } else if (key === 'SUMMARY') {
         event.summary = value.replace(/\\,/g, ',').replace(/\\n/gi, ' ').replace(/\\\\/g, '\\');
+      } else if (key === 'RRULE') {
+        event.rrule = value;
+      } else if (key === 'EXDATE') {
+        // Kann mehrere kommagetrennte Daten enthalten
+        const exList = value.split(',').map((v) => parseICSDate(v.trim()));
+        event.exdates = (event.exdates || []).concat(exList);
       }
     }
 
@@ -566,24 +572,123 @@
     return new Date(year, month, day);
   }
 
+  function parseRRuleString(rrule) {
+    const parts = {};
+    rrule.split(';').forEach((p) => {
+      const [k, v] = p.split('=');
+      if (k) parts[k.toUpperCase()] = v;
+    });
+    return parts;
+  }
+
+  function addDays(date, n) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+  function addMonths(date, n) {
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + n);
+    return d;
+  }
+  function addYears(date, n) {
+    const d = new Date(date);
+    d.setFullYear(d.getFullYear() + n);
+    return d;
+  }
+  function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  // Erweitert ein Event mit RRULE zu einzelnen Terminen innerhalb von [rangeStart, rangeEnd]
+  // Unterstützt: FREQ=DAILY/WEEKLY/MONTHLY/YEARLY, INTERVAL, COUNT, UNTIL, EXDATE
+  // (BYDAY/BYMONTHDAY werden nicht ausgewertet - reicht für typische Haushalts-Termine wie Mülltonnen, Serientermine)
+  function expandRecurrence(event, rangeStart, rangeEnd) {
+    if (!event.rrule) {
+      return event.dtstart >= rangeStart && event.dtstart <= rangeEnd ? [event.dtstart] : [];
+    }
+
+    const rule = parseRRuleString(event.rrule);
+    const freq = rule.FREQ;
+    const interval = parseInt(rule.INTERVAL || '1', 10) || 1;
+    const count = rule.COUNT ? parseInt(rule.COUNT, 10) : null;
+    const until = rule.UNTIL ? parseICSDate(rule.UNTIL) : null;
+
+    const results = [];
+    let current = new Date(event.dtstart);
+    let n = 0;
+    const maxIterations = 1500; // Sicherheitsbremse gegen Endlosschleifen
+    let iter = 0;
+
+    while (iter < maxIterations) {
+      iter++;
+      if (until && current > until) break;
+      if (count != null && n >= count) break;
+      if (current > rangeEnd) break;
+
+      if (current >= rangeStart && current <= rangeEnd) {
+        const excluded = (event.exdates || []).some((ex) => isSameDay(ex, current));
+        if (!excluded) results.push(new Date(current));
+      }
+      n++;
+
+      if (freq === 'DAILY') {
+        current = addDays(current, interval);
+      } else if (freq === 'WEEKLY') {
+        current = addDays(current, 7 * interval);
+      } else if (freq === 'MONTHLY') {
+        current = addMonths(current, interval);
+      } else if (freq === 'YEARLY') {
+        current = addYears(current, interval);
+      } else {
+        break; // unbekannte Frequenz, nicht weiter expandieren
+      }
+    }
+
+    return results;
+  }
+
+  // Alle geparsten Events auf einen Anzeige-Zeitraum expandieren (wiederkehrende Termine einzeln auflösen)
+  function expandAllRecurrences(rawEvents) {
+    const now = new Date();
+    const rangeStart = new Date(now.getFullYear(), now.getMonth(), 1); // Anfang aktueller Monat
+    const rangeEnd = addDays(now, 120); // ca. 4 Monate voraus
+
+    const expanded = [];
+    rawEvents.forEach((ev) => {
+      const occurrences = expandRecurrence(ev, rangeStart, rangeEnd);
+      occurrences.forEach((d) => {
+        expanded.push({ dtstart: d, summary: ev.summary });
+      });
+    });
+    return expanded;
+  }
+
   // ICS Upload Handler
   document.getElementById('icsUpload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const text = await file.text();
-    const events = parseICS(text);
+    const rawEvents = parseICS(text);
 
-    if (events.length === 0) {
+    if (rawEvents.length === 0) {
       alert('Keine Termine in der Datei gefunden. Bitte prüfen, ob es eine gültige .ics-Datei ist.');
       e.target.value = '';
       return;
     }
 
+    const events = expandAllRecurrences(rawEvents);
+
     await window.storage.set('household:calendar-ics-events', JSON.stringify(events), true);
     await renderCalendar();
 
-    alert(`${events.length} Termine geladen!`);
+    const recurringCount = rawEvents.filter((ev) => ev.rrule).length;
+    alert(
+      `${rawEvents.length} Termine aus der Datei gelesen` +
+      (recurringCount > 0 ? ` (davon ${recurringCount} wiederkehrend)` : '') +
+      `.\n${events.length} einzelne Termine der nächsten Monate wurden angezeigt.`
+    );
     e.target.value = '';
   });
 
