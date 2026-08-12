@@ -877,6 +877,58 @@
         await updateActionsOverview();
       }
     }
+
+    if (e.target.id === 'shoppingCount') {
+      const itemInput = prompt('Was soll auf die Einkaufsliste? (mehrere Artikel mit Komma trennen)');
+      if (itemInput !== null && itemInput.trim()) {
+        const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
+
+        // Gleiche Listen-Struktur wie im Einkaufszettel: erste/Standard-Liste verwenden, notfalls anlegen
+        let lists = [];
+        try {
+          const existingLists = await window.storage.get('shoppingapp:lists', true);
+          if (existingLists) lists = JSON.parse(existingLists.value);
+        } catch (e) {}
+
+        if (lists.length === 0) {
+          lists.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+            name: 'Einkaufsliste',
+            icon: '🛍️',
+            color: '#3C6E8F',
+            createdAt: Date.now(),
+          });
+          await window.storage.set('shoppingapp:lists', JSON.stringify(lists), true);
+        }
+        const targetListId = lists[0].id;
+
+        let items = [];
+        try {
+          const existingItems = await window.storage.get('shoppingapp:items', true);
+          if (existingItems) items = JSON.parse(existingItems.value);
+        } catch (e) {}
+
+        names.forEach((name) => {
+          const already = items.find(
+            (it) => it.listId === targetListId && !it.checked && it.n.toLowerCase() === name.toLowerCase()
+          );
+          if (!already) {
+            items.push({
+              id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+              listId: targetListId,
+              n: name,
+              c: 'sonstiges',
+              i: '📝',
+              checked: false,
+              qty: 1,
+            });
+          }
+        });
+
+        await window.storage.set('shoppingapp:items', JSON.stringify(items), true);
+        await updateActionsOverview();
+      }
+    }
   });
 
   // Initialisierung
