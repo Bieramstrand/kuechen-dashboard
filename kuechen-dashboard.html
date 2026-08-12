@@ -348,6 +348,46 @@
     </div>
   </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  // Firebase Setup – ersetzt window.storage 1:1, damit der Rest des Codes unverändert bleibt
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFbKIBKr0gr621e8XSljAG4lGXOSrIxwo",
+    authDomain: "homedashboard-8d951.firebaseapp.com",
+    projectId: "homedashboard-8d951",
+    storageBucket: "homedashboard-8d951.firebasestorage.app",
+    messagingSenderId: "443725141758",
+    appId: "1:443725141758:web:64331ff8100f27acd037af"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const COLLECTION = 'household';
+
+  window.storage = {
+    async get(key, shared) {
+      const snap = await db.collection(COLLECTION).doc(key).get();
+      if (!snap.exists) return null;
+      return { key, value: snap.data().value, shared: !!shared };
+    },
+    async set(key, value, shared) {
+      await db.collection(COLLECTION).doc(key).set({ value, updatedAt: Date.now() });
+      return { key, value, shared: !!shared };
+    },
+    async delete(key, shared) {
+      await db.collection(COLLECTION).doc(key).delete();
+      return { key, deleted: true, shared: !!shared };
+    },
+    async list(prefix, shared) {
+      const snap = await db.collection(COLLECTION).get();
+      const keys = [];
+      snap.forEach((d) => {
+        if (!prefix || d.id.startsWith(prefix)) keys.push(d.id);
+      });
+      return { keys, prefix, shared: !!shared };
+    },
+  };
+</script>
 <script>
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
   

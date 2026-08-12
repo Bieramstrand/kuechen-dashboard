@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unser Zuhause – Projekte &amp; Urlaub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #FBF8EF;
+    --bg: #E4DCC5;
+    --card: #F1ECDD;
+    --border: #E4DCC5;
+    --ink: #2A2417;
+    --muted: #9B9280;
+    --muted2: #5B5340;
+    --moss: #4F6B44;
+    --ocean: #3C6E8F;
+    --mustard: #D9A441;
+    --rust: #B5533C;
+    --kino: #7C3B42;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    padding: 32px 12px;
+  }
+
+  .wrap { width: 100%; max-width: 420px; }
+
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .title h1 {
+    font-family: 'Caveat', cursive;
+    font-size: 2.4rem;
+    margin: 0;
+    font-weight: 700;
+  }
+  .title p {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin: 2px 0 0;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 8px;
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+    font-family: 'Caveat', cursive;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    color: var(--paper);
+    clip-path: polygon(6% 0, 94% 0, 100% 100%, 0% 100%);
+    transform: translateY(4px);
+    z-index: 1;
+  }
+  .tab-btn.moss { background: var(--moss); }
+  .tab-btn.ocean { background: var(--ocean); }
+  .tab-btn.kino { background: var(--kino); }
+  .tab-btn.active {
+    background: var(--paper) !important;
+    color: var(--ink);
+    transform: translateY(0);
+    z-index: 2;
+  }
+
+  .page {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 0 0 3px 3px;
+    box-shadow: 4px 6px 0 rgba(42,36,23,0.12);
+    padding: 16px;
+    min-height: 300px;
+  }
+
+  .hidden { display: none !important; }
+
+  input, select {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+  }
+  .field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #C9BF9F;
+    padding: 7px 0;
+    outline: none;
+    color: var(--ink);
+  }
+  .field:focus { border-bottom-color: var(--ocean); }
+  .field.moss-focus:focus { border-bottom-color: var(--moss); }
+
+  .select {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 8px;
+  }
+
+  .row { display: flex; gap: 8px; }
+
+  .btn {
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+  .btn.moss { background: var(--moss); }
+  .btn.ocean { background: var(--ocean); }
+
+  .empty {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+    padding: 24px 0;
+  }
+
+  /* Project list */
+  .proj-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border-radius: 3px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+  }
+  .status-chip {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .status-idee { background: var(--mustard); color: var(--ink); }
+  .status-in-arbeit { background: var(--ocean); color: var(--paper); }
+  .status-fertig { background: var(--moss); color: var(--paper); }
+
+  .proj-body { flex: 1; min-width: 0; }
+  .proj-body p.t { font-size: 0.875rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proj-body p.c { font-size: 0.68rem; color: var(--muted); margin: 1px 0 0; }
+
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--rust);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px;
+  }
+
+  /* Trip card */
+  .trip-card {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    box-shadow: 3px 4px 0 rgba(42,36,23,0.15);
+    margin-bottom: 20px;
+    transform: rotate(-0.3deg);
+    padding: 16px;
+  }
+  .tape {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    width: 56px;
+    height: 24px;
+    background: rgba(217,164,65,0.7);
+    transform: rotate(-4deg);
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  }
+  .trip-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .trip-dest { font-family: 'Fraunces', serif; font-size: 1.5rem; margin: 0; line-height: 1.1; }
+  .trip-meta { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--muted2); margin-top: 4px; flex-wrap: wrap; }
+  .trip-meta .sep { margin-left: 10px; }
+
+  .checklist-toggle {
+    margin-top: 10px;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    color: var(--ocean);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .checklist {
+    margin-top: 8px;
+    border-top: 1px dashed var(--border);
+    padding-top: 8px;
+  }
+  .cl-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+  }
+  .cl-check {
+    width: 16px; height: 16px;
+    border: 1px solid var(--muted2);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+  }
+  .cl-check.done { background: var(--moss); border-color: var(--moss); color: white; font-size: 10px; }
+  .cl-text.done { text-decoration: line-through; color: var(--muted); }
+  .cl-del { margin-left: auto; background: none; border: none; color: var(--rust); cursor: pointer; }
+
+  .cl-form { display: flex; gap: 8px; margin-top: 6px; }
+  .cl-form .field { font-size: 0.85rem; padding: 4px 0; }
+  .cl-form button { background: none; border: none; color: var(--ocean); cursor: pointer; }
+
+  .footnote {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--muted2);
+    margin-top: 16px;
+  }
+
+  /* Packliste */
+  .pack-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 26px 2px 14px;
+  }
+  .pack-divider span {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .pack-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .pack-overall-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 0 4px; }
+  .bar-track { flex: 1; height: 6px; border-radius: 3px; background: var(--card); overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--mustard), var(--moss)); transition: width .3s ease; }
+  .overall-count { font-size: 12px; color: var(--muted2); font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
+
+  .pack-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 2px 3px 0 rgba(42,36,23,0.08);
+    overflow: hidden;
+  }
+  .pack-card-header {
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+  }
+  .pack-card-header-left { display: flex; align-items: center; gap: 10px; }
+  .pack-card-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.05rem; }
+  .pack-card-subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+  .pack-card-header-right { display: flex; align-items: center; gap: 8px; }
+  .pack-card-count { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pack-chevron { transition: transform .2s ease; display: flex; }
+  .pack-chevron.collapsed { transform: rotate(-90deg); }
+  .pack-progress-track { height: 3px; background: var(--card); }
+  .pack-progress-fill { height: 100%; background: var(--mustard); transition: width .26s ease; }
+  .pack-list { padding: 4px 8px 12px; }
+  .pack-row { display: flex; align-items: center; gap: 10px; padding: 7px 6px; border-radius: 6px; }
+  .pack-check {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 5px;
+    border: 1.6px solid #C9BF9F;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; background: transparent; padding: 0;
+  }
+  .pack-check.checked { background: var(--moss); border-color: var(--moss); }
+  .pack-label { flex: 1; font-size: 0.85rem; cursor: pointer; line-height: 1.4; }
+  .pack-label.checked { color: var(--muted); text-decoration: line-through; }
+  .pack-remove { background: none; border: none; color: #C9BF9F; font-size: 16px; cursor: pointer; padding: 0 4px; }
+  .pack-add-row { display: flex; gap: 6px; margin-top: 8px; padding: 0 6px; }
+  .pack-add-input { flex: 1; border: 1px solid var(--border); background: var(--card); border-radius: 6px; padding: 7px 10px; font-size: 0.8rem; font-family: 'Inter', sans-serif; color: var(--ink); outline: none; }
+  .pack-add-btn { background: var(--moss); color: white; border: none; border-radius: 6px; padding: 7px 12px; font-size: 0.78rem; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .pack-reset-btn { background: transparent; border: none; color: var(--muted); font-size: 0.7rem; cursor: pointer; margin-top: 8px; padding: 0 6px; text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Kino */
+  .kino-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .kino-toolbar h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    margin: 0;
+  }
+  .kino-toolbar p {
+    font-size: 0.72rem;
+    color: var(--muted2);
+    margin: 2px 0 0;
+  }
+  .kino-refresh {
+    background: var(--kino);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .kino-frame-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .kino-frame {
+    width: 100%;
+    height: 640px;
+    border: none;
+    display: block;
+  }
+  .kino-fallback {
+    font-size: 0.72rem;
+    color: var(--muted2);
+    text-align: center;
+    margin: 10px 4px 0;
+    line-height: 1.5;
+  }
+  .kino-fallback a {
+    color: var(--ocean);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">
+      <h1>unser Zuhause</h1>
+      <p>Projekte, Urlaub &amp; Kino</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn moss active" id="tabProjectsBtn">⌂ Projekte</button>
+      <button class="tab-btn ocean" id="tabTripsBtn">✈ Urlaub</button>
+      <button class="tab-btn kino" id="tabKinoBtn">🎬 Kino</button>
+    </div>
+
+    <div class="page">
+      <div id="loading" class="empty">Wird geladen …</div>
+
+      <div id="projectsSection" class="hidden">
+        <form id="projectForm">
+          <input class="field moss-focus" id="pTitle" placeholder="Neues Projekt, z.B. Bad renovieren" />
+          <div class="row" style="margin-top:8px;">
+            <select class="select" id="pCat">
+              <option>Renovierung</option>
+              <option>Garten</option>
+              <option>Reparatur</option>
+              <option>Einkauf</option>
+              <option selected>Sonstiges</option>
+            </select>
+            <button type="submit" class="btn moss">+ Hinzufügen</button>
+          </div>
+        </form>
+        <div id="projectsList" style="margin-top:16px;"></div>
+
+        <div class="pack-divider"><span>Anschaffungen</span></div>
+        <div class="pack-overall-row">
+          <div class="bar-track"><div class="bar-fill" id="acqOverallBar"></div></div>
+          <span class="overall-count" id="acqOverallCount">0 / 0</span>
+        </div>
+        <div id="acqRoot"></div>
+      </div>
+
+      <div id="tripsSection" class="hidden">
+        <form id="tripForm">
+          <input class="field" id="tDest" placeholder="Reiseziel, z.B. Toskana" />
+          <div class="row" style="margin-top:8px;">
+            <input type="date" class="field" id="tStart" style="font-size:0.75rem;" />
+            <input type="date" class="field" id="tEnd" style="font-size:0.75rem;" />
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <input class="field" id="tBudget" placeholder="Budget in €" inputmode="numeric" />
+            <button type="submit" class="btn ocean">+ Reise</button>
+          </div>
+        </form>
+        <div id="tripsList" style="margin-top:20px;"></div>
+
+        <div class="pack-divider"><span>Packliste</span></div>
+        <div class="pack-overall-row">
+          <div class="bar-track"><div class="bar-fill" id="packOverallBar"></div></div>
+          <span class="overall-count" id="packOverallCount">0 / 0</span>
+        </div>
+        <div id="packlisteRoot"></div>
+      </div>
+
+      <div id="kinoSection" class="hidden">
+        <div class="kino-toolbar">
+          <div>
+            <h2>Kinoprogramm</h2>
+            <p>Cinemotion Norderstedt – live von der Kino-Website</p>
+          </div>
+          <button class="kino-refresh" id="kinoRefreshBtn">⟳ Aktualisieren</button>
+        </div>
+        <div class="kino-frame-wrap">
+          <iframe
+            id="kinoFrame"
+            class="kino-frame"
+            src="https://norderstedt.cinemotion-kino.de/programmuebersicht/"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Kinoprogramm Cinemotion Norderstedt"
+          ></iframe>
+        </div>
+        <p class="kino-fallback">
+          Wird hier nichts angezeigt? <a href="https://norderstedt.cinemotion-kino.de/programmuebersicht/" target="_blank" rel="noopener">Programm direkt auf cinemotion-kino.de öffnen</a>
+        </p>
+      </div>
+    </div>
+
+    <p class="footnote">Alle Einträge werden geteilt gespeichert – jeder im Haushalt sieht dieselbe Liste.</p>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  // Firebase Setup – ersetzt window.storage 1:1, damit der Rest des Codes unverändert bleibt
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFbKIBKr0gr621e8XSljAG4lGXOSrIxwo",
+    authDomain: "homedashboard-8d951.firebaseapp.com",
+    projectId: "homedashboard-8d951",
+    storageBucket: "homedashboard-8d951.firebasestorage.app",
+    messagingSenderId: "443725141758",
+    appId: "1:443725141758:web:64331ff8100f27acd037af"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const COLLECTION = 'household';
+
+  window.storage = {
+    async get(key, shared) {
+      const snap = await db.collection(COLLECTION).doc(key).get();
+      if (!snap.exists) return null;
+      return { key, value: snap.data().value, shared: !!shared };
+    },
+    async set(key, value, shared) {
+      await db.collection(COLLECTION).doc(key).set({ value, updatedAt: Date.now() });
+      return { key, value, shared: !!shared };
+    },
+    async delete(key, shared) {
+      await db.collection(COLLECTION).doc(key).delete();
+      return { key, deleted: true, shared: !!shared };
+    },
+    async list(prefix, shared) {
+      const snap = await db.collection(COLLECTION).get();
+      const keys = [];
+      snap.forEach((d) => {
+        if (!prefix || d.id.startsWith(prefix)) keys.push(d.id);
+      });
+      return { keys, prefix, shared: !!shared };
+    },
+  };
+</script>
+<script>
+  const STATUS_FLOW = ['idee', 'in-arbeit', 'fertig'];
+  const STATUS_LABEL = { idee: 'Idee', 'in-arbeit': 'In Arbeit', fertig: 'Fertig' };
+
+  let projects = [];
+  let trips = [];
+  let openTrips = new Set();
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  async function persist(key, value) {
+    try {
+      await window.storage.set(key, JSON.stringify(value), true);
+    } catch (e) {
+      console.error('Speichern fehlgeschlagen', e);
+    }
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---------- Projects ----------
+  function renderProjects() {
+    const el = document.getElementById('projectsList');
+    if (projects.length === 0) {
+      el.innerHTML = '<p class="empty">Noch keine Projekte. Was steht als Nächstes an?</p>';
+      return;
+    }
+    el.innerHTML = projects.map(p => `
+      <div class="proj-item">
+        <button class="status-chip status-${p.status}" onclick="cycleStatus('${p.id}')">${STATUS_LABEL[p.status]}</button>
+        <div class="proj-body">
+          <p class="t">${esc(p.title)}</p>
+          <p class="c">${esc(p.category)}</p>
+        </div>
+        <button class="icon-btn" onclick="deleteProject('${p.id}')">🗑</button>
+      </div>
+    `).join('');
+  }
+
+  window.cycleStatus = function (id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    p.status = STATUS_FLOW[(STATUS_FLOW.indexOf(p.status) + 1) % 3];
+    persist('household:projects', projects);
+    renderProjects();
+  };
+  window.deleteProject = function (id) {
+    projects = projects.filter(p => p.id !== id);
+    persist('household:projects', projects);
+    renderProjects();
+  };
+
+  document.getElementById('projectForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('pTitle').value.trim();
+    if (!title) return;
+    const cat = document.getElementById('pCat').value;
+    projects.unshift({ id: uid(), title, category: cat, status: 'idee' });
+    persist('household:projects', projects);
+    document.getElementById('pTitle').value = '';
+    renderProjects();
+  });
+
+  // ---------- Trips ----------
+  function renderTrips() {
+    const el = document.getElementById('tripsList');
+    if (trips.length === 0) {
+      el.innerHTML = '<p class="empty">Noch keine Reise geplant. Wohin soll es gehen?</p>';
+      return;
+    }
+    el.innerHTML = trips.map(t => {
+      const isOpen = openTrips.has(t.id);
+      const done = t.checklist.filter(i => i.done).length;
+      const total = t.checklist.length;
+      return `
+        <div class="trip-card">
+          <div class="tape"></div>
+          <div class="trip-top">
+            <div>
+              <p class="trip-dest">${esc(t.destination)}</p>
+              <div class="trip-meta">
+                <span>📍 ${esc(t.start || '?')} – ${esc(t.end || '?')}</span>
+                ${t.budget ? `<span class="sep">💰 ${esc(t.budget)} €</span>` : ''}
+              </div>
+            </div>
+            <button class="icon-btn" onclick="deleteTrip('${t.id}')">🗑</button>
+          </div>
+          <button class="checklist-toggle" onclick="toggleOpen('${t.id}')">
+            Checkliste ${total > 0 ? `(${done}/${total})` : ''} ${isOpen ? '▲' : '▼'}
+          </button>
+          ${isOpen ? `
+            <div class="checklist">
+              ${t.checklist.map(i => `
+                <div class="cl-item">
+                  <button class="cl-check ${i.done ? 'done' : ''}" onclick="toggleItem('${t.id}','${i.id}')">${i.done ? '✓' : ''}</button>
+                  <span class="cl-text ${i.done ? 'done' : ''}">${esc(i.text)}</span>
+                  <button class="cl-del" onclick="deleteItem('${t.id}','${i.id}')">✕</button>
+                </div>
+              `).join('')}
+              <form class="cl-form" onsubmit="return submitItem(event,'${t.id}')">
+                <input class="field" placeholder="z.B. Pässe einpacken" id="clInput-${t.id}" />
+                <button type="submit">+</button>
+              </form>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.toggleOpen = function (id) {
+    if (openTrips.has(id)) openTrips.delete(id); else openTrips.add(id);
+    renderTrips();
+  };
+  window.deleteTrip = function (id) {
+    trips = trips.filter(t => t.id !== id);
+    persist('household:trips', trips);
+    renderTrips();
+  };
+  window.toggleItem = function (tripId, itemId) {
+    const t = trips.find(x => x.id === tripId);
+    const i = t.checklist.find(x => x.id === itemId);
+    i.done = !i.done;
+    persist('household:trips', trips);
+    renderTrips();
+  };
+  window.deleteItem = function (tripId, itemId) {
+    const t = trips.find(x => x.id === tripId);
+    t.checklist = t.checklist.filter(i => i.id !== itemId);
+    persist('household:trips', trips);
+    renderTrips();
+  };
+  window.submitItem = function (e, tripId) {
+    e.preventDefault();
+    const input = document.getElementById(`clInput-${tripId}`);
+    const text = input.value.trim();
+    if (!text) return false;
+    const t = trips.find(x => x.id === tripId);
+    t.checklist.push({ id: uid(), text, done: false });
+    persist('household:trips', trips);
+    renderTrips();
+    return false;
+  };
+
+  document.getElementById('tripForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const destination = document.getElementById('tDest').value.trim();
+    if (!destination) return;
+    trips.unshift({
+      id: uid(),
+      destination,
+      start: document.getElementById('tStart').value,
+      end: document.getElementById('tEnd').value,
+      budget: document.getElementById('tBudget').value,
+      checklist: []
+    });
+    persist('household:trips', trips);
+    document.getElementById('tDest').value = '';
+    document.getElementById('tStart').value = '';
+    document.getElementById('tEnd').value = '';
+    document.getElementById('tBudget').value = '';
+    renderTrips();
+  });
+
+  // ---------- Packliste ----------
+  const DEFAULT_PACK = {
+    categories: [
+      {
+        id: "haushalt",
+        title: "Haushalt & Ausstattung",
+        subtitle: "Was in Küche, Bad und Wohnraum bereitliegen sollte",
+        icon: "home",
+        items: [
+          { id: "kaffee", label: "Kaffee", checked: false },
+          { id: "salzpfeffer", label: "Salz und Pfeffer", checked: false },
+          { id: "handtuecher", label: "Kleine Handtücher für Gesicht/Hände", checked: false },
+          { id: "decke", label: "Decke", checked: false },
+          { id: "tischdecke", label: "Tischdecke", checked: false },
+          { id: "kaffeeportionierer", label: "Kaffeeportionierer", checked: false },
+          { id: "becher", label: "Becher", checked: false },
+          { id: "geschirrhandtuecher", label: "Geschirrhandtücher", checked: false },
+          { id: "muellbeutel", label: "Müllbeutel", checked: false },
+          { id: "schwaemme", label: "Schwämme/Bürste/Lappen", checked: true },
+          { id: "eiswuerfelbehaelter", label: "Eiswürfelbehälter", checked: true },
+          { id: "servietten", label: "Servietten", checked: true },
+          { id: "weinglaeser", label: "Weingläser", checked: true },
+          { id: "fleckenentferner", label: "Fleckenentferner/Reisewaschmittel", checked: true },
+          { id: "desinfektionstuecher", label: "Reinigungs-/Desinfektionstücher", checked: true },
+          { id: "toilettenpapier", label: "Toilettenpapier", checked: true },
+          { id: "strohhalme", label: "Strohhalme", checked: true },
+          { id: "feuerzeug", label: "Feuerzeug", checked: true },
+          { id: "zewa", label: "Zewa", checked: true },
+          { id: "insektenkerze", label: "Insektenkerze", checked: true },
+          { id: "spuelmittel", label: "Spüli", checked: true },
+          { id: "lampe", label: "Lampe für draußen", checked: true },
+          { id: "kaffeefilter", label: "Kaffeefilter", checked: true },
+          { id: "glasreiniger", label: "Glasreiniger", checked: true },
+          { id: "messer", label: "Scharfe Messer", checked: true },
+          { id: "seife", label: "Seife", checked: true },
+          { id: "gummibaender", label: "Gummibänder", checked: true },
+          { id: "zipbeutel", label: "ZIP-Beutel", checked: true }
+        ]
+      },
+      {
+        id: "apotheke",
+        title: "Reiseapotheke",
+        subtitle: "Für den Notfall im Schrank oder Erste-Hilfe-Kasten",
+        icon: "cross",
+        items: [
+          { id: "erstehilfe", label: "Erste-Hilfe-Set", checked: false },
+          { id: "desinfektionsmittel", label: "Desinfektionsmittel", checked: false },
+          { id: "wundsalbe", label: "Wundsalbe", checked: false },
+          { id: "elektrolyte", label: "Elektrolyte", checked: false },
+          { id: "erkaeltung", label: "Medikamente gegen Erkältung", checked: false },
+          { id: "schmerzmittel", label: "Schmerzmittel", checked: false },
+          { id: "fieber", label: "Mittel gegen Fieber", checked: false },
+          { id: "thermometer", label: "Thermometer", checked: false },
+          { id: "allergie", label: "Allergietabletten", checked: false },
+          { id: "insektenstiche", label: "Mittel gegen Insektenstiche", checked: false }
+        ]
+      }
+    ]
+  };
+
+  let packData = { categories: [] };
+  let packCollapsed = {};
+
+  async function loadPack() {
+    try {
+      const r = await window.storage.get('household:packliste', true);
+      packData = r ? JSON.parse(r.value) : JSON.parse(JSON.stringify(DEFAULT_PACK));
+    } catch (e) {
+      packData = JSON.parse(JSON.stringify(DEFAULT_PACK));
+    }
+  }
+  function savePack() {
+    persist('household:packliste', packData);
+  }
+
+  function packIcon(id) {
+    if (id === 'cross') {
+      return `<svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="20" height="20" rx="5" stroke="#4F6B44" stroke-width="1.6"/>
+        <path d="M11 6V16M6 11H16" stroke="#B5533C" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>`;
+    }
+    return `<svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M4 9H16V13.5C16 16 14 18 11 18H9C6 18 4 16 4 13.5V9Z" stroke="#4F6B44" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M16 10.5H17.5C18.6 10.5 19.5 11.4 19.5 12.5C19.5 13.6 18.6 14.5 17.5 14.5H16" stroke="#4F6B44" stroke-width="1.6"/>
+      <path d="M7 5.5C7 4.5 7.6 4 8 3.3M10.5 5.5C10.5 4.5 11.1 4 11.5 3.3" stroke="#D9A441" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>`;
+  }
+  function packCheckIcon() {
+    return `<svg width="13" height="10" viewBox="0 0 15 12" fill="none">
+      <path d="M1.5 6.2L5.3 10L13.5 1.5" stroke="#FBF8EF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  }
+  function packChevron() {
+    return `<svg width="13" height="13" viewBox="0 0 14 14"><path d="M3 5L7 9L11 5" stroke="#9B9280" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`;
+  }
+
+  function renderPack() {
+    const totalItems = packData.categories.reduce((s, c) => s + c.items.length, 0);
+    const totalChecked = packData.categories.reduce((s, c) => s + c.items.filter(i => i.done || i.checked).length, 0);
+    document.getElementById('packOverallBar').style.width = totalItems ? (totalChecked / totalItems * 100) + '%' : '0%';
+    document.getElementById('packOverallCount').textContent = totalChecked + ' / ' + totalItems;
+
+    const root = document.getElementById('packlisteRoot');
+    root.innerHTML = packData.categories.map(cat => {
+      const checkedCount = cat.items.filter(i => i.checked).length;
+      const isCollapsed = !!packCollapsed[cat.id];
+      return `
+        <div class="pack-card">
+          <button class="pack-card-header" data-cat="${cat.id}" data-action="pack-toggle-collapse">
+            <div class="pack-card-header-left">
+              ${packIcon(cat.icon)}
+              <div>
+                <div class="pack-card-title">${esc(cat.title)}</div>
+                <div class="pack-card-subtitle">${esc(cat.subtitle)}</div>
+              </div>
+            </div>
+            <div class="pack-card-header-right">
+              <span class="pack-card-count">${checkedCount}/${cat.items.length}</span>
+              <span class="pack-chevron ${isCollapsed ? 'collapsed' : ''}">${packChevron()}</span>
+            </div>
+          </button>
+          <div class="pack-progress-track"><div class="pack-progress-fill" style="width:${cat.items.length ? (checkedCount / cat.items.length * 100) : 0}%"></div></div>
+          ${isCollapsed ? '' : `
+          <div class="pack-list">
+            ${cat.items.map(item => `
+              <div class="pack-row">
+                <button class="pack-check ${item.checked ? 'checked' : ''}" data-cat="${cat.id}" data-item="${item.id}" data-action="pack-toggle-item">
+                  ${item.checked ? packCheckIcon() : ''}
+                </button>
+                <span class="pack-label ${item.checked ? 'checked' : ''}" data-cat="${cat.id}" data-item="${item.id}" data-action="pack-toggle-item">${esc(item.label)}</span>
+                <button class="pack-remove" data-cat="${cat.id}" data-item="${item.id}" data-action="pack-remove-item">×</button>
+              </div>
+            `).join('')}
+            <div class="pack-add-row">
+              <input class="pack-add-input" type="text" placeholder="Weiteres Teil hinzufügen …" data-cat="${cat.id}" data-role="pack-draft-input" />
+              <button class="pack-add-btn" data-cat="${cat.id}" data-action="pack-add-item">+</button>
+            </div>
+            ${checkedCount > 0 ? `<button class="pack-reset-btn" data-cat="${cat.id}" data-action="pack-reset-cat">Häkchen zurücksetzen</button>` : ''}
+          </div>
+          `}
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const action = el.dataset.action;
+    if (!action || action.indexOf('pack-') !== 0) return;
+    const catId = el.dataset.cat;
+    const cat = packData.categories.find(c => c.id === catId);
+
+    if (action === 'pack-toggle-collapse') {
+      packCollapsed[catId] = !packCollapsed[catId];
+      renderPack();
+    } else if (action === 'pack-toggle-item') {
+      const item = cat.items.find(i => i.id === el.dataset.item);
+      item.checked = !item.checked;
+      savePack();
+      renderPack();
+    } else if (action === 'pack-remove-item') {
+      cat.items = cat.items.filter(i => i.id !== el.dataset.item);
+      savePack();
+      renderPack();
+    } else if (action === 'pack-add-item') {
+      const input = document.querySelector(`input[data-cat="${catId}"][data-role="pack-draft-input"]`);
+      const text = input.value.trim();
+      if (!text) return;
+      cat.items.push({ id: 'custom-' + uid(), label: text, checked: false });
+      savePack();
+      renderPack();
+    } else if (action === 'pack-reset-cat') {
+      cat.items.forEach(i => (i.checked = false));
+      savePack();
+      renderPack();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.dataset && e.target.dataset.role === 'pack-draft-input') {
+      const catId = e.target.dataset.cat;
+      document.querySelector(`[data-action="pack-add-item"][data-cat="${catId}"]`).click();
+    }
+  });
+
+  // ---------- Anschaffungen ----------
+  const DEFAULT_ACQ = {
+    categories: [
+      {
+        id: "haus",
+        title: "Haus",
+        items: [
+          { id: "tuer-treppenhaus", label: "Tür Treppenhaus", checked: false },
+          { id: "waschbeckenunterschrank", label: "Waschbeckenunterschrank Bad 2. OG", checked: false },
+          { id: "spiegel-bad", label: "Spiegel Bad 2. OG", checked: false },
+          { id: "lampe-bad", label: "Lampe Bad 2. OG", checked: false },
+          { id: "vitrinenschrank", label: "Vitrinenschrank Superfreunde und Büro", checked: false }
+        ]
+      },
+      {
+        id: "garten",
+        title: "Garten",
+        items: [
+          { id: "gartenhaeuschen", label: "Gartenhäuschen", checked: false },
+          { id: "hecke", label: "Hecke zur Abgrenzung", checked: false },
+          { id: "verkleidung-betonklotz", label: "Verkleidung Betonklotz", checked: false },
+          { id: "pflanzen", label: "Pflanzen, insb. Pampasgras", checked: false }
+        ]
+      }
+    ]
+  };
+
+  let acqData = { categories: [] };
+  let acqCollapsed = {};
+
+  async function loadAcq() {
+    try {
+      const r = await window.storage.get('household:anschaffungen', true);
+      acqData = r ? JSON.parse(r.value) : JSON.parse(JSON.stringify(DEFAULT_ACQ));
+    } catch (e) {
+      acqData = JSON.parse(JSON.stringify(DEFAULT_ACQ));
+    }
+  }
+  function saveAcq() {
+    persist('household:anschaffungen', acqData);
+  }
+
+  function renderAcq() {
+    const totalItems = acqData.categories.reduce((s, c) => s + c.items.length, 0);
+    const totalChecked = acqData.categories.reduce((s, c) => s + c.items.filter(i => i.checked).length, 0);
+    document.getElementById('acqOverallBar').style.width = totalItems ? (totalChecked / totalItems * 100) + '%' : '0%';
+    document.getElementById('acqOverallCount').textContent = totalChecked + ' / ' + totalItems;
+
+    const root = document.getElementById('acqRoot');
+    root.innerHTML = acqData.categories.map(cat => {
+      const checkedCount = cat.items.filter(i => i.checked).length;
+      const isCollapsed = !!acqCollapsed[cat.id];
+      return `
+        <div class="pack-card">
+          <button class="pack-card-header" data-cat="${cat.id}" data-action="acq-toggle-collapse">
+            <div class="pack-card-header-left">
+              <div class="pack-card-title">${esc(cat.title)}</div>
+            </div>
+            <div class="pack-card-header-right">
+              <span class="pack-card-count">${checkedCount}/${cat.items.length}</span>
+              <span class="pack-chevron ${isCollapsed ? 'collapsed' : ''}">${packChevron()}</span>
+            </div>
+          </button>
+          <div class="pack-progress-track"><div class="pack-progress-fill" style="width:${cat.items.length ? (checkedCount / cat.items.length * 100) : 0}%"></div></div>
+          ${isCollapsed ? '' : `
+          <div class="pack-list">
+            ${cat.items.map(item => `
+              <div class="pack-row">
+                <button class="pack-check ${item.checked ? 'checked' : ''}" data-cat="${cat.id}" data-item="${item.id}" data-action="acq-toggle-item">
+                  ${item.checked ? packCheckIcon() : ''}
+                </button>
+                <span class="pack-label ${item.checked ? 'checked' : ''}" data-cat="${cat.id}" data-item="${item.id}" data-action="acq-toggle-item">${esc(item.label)}</span>
+                <button class="pack-remove" data-cat="${cat.id}" data-item="${item.id}" data-action="acq-remove-item">×</button>
+              </div>
+            `).join('')}
+            <div class="pack-add-row">
+              <input class="pack-add-input" type="text" placeholder="Weitere Anschaffung hinzufügen …" data-cat="${cat.id}" data-role="acq-draft-input" />
+              <button class="pack-add-btn" data-cat="${cat.id}" data-action="acq-add-item">+</button>
+            </div>
+            ${checkedCount > 0 ? `<button class="pack-reset-btn" data-cat="${cat.id}" data-action="acq-reset-cat">Häkchen zurücksetzen</button>` : ''}
+          </div>
+          `}
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const action = el.dataset.action;
+    if (!action || action.indexOf('acq-') !== 0) return;
+    const catId = el.dataset.cat;
+    const cat = acqData.categories.find(c => c.id === catId);
+
+    if (action === 'acq-toggle-collapse') {
+      acqCollapsed[catId] = !acqCollapsed[catId];
+      renderAcq();
+    } else if (action === 'acq-toggle-item') {
+      const item = cat.items.find(i => i.id === el.dataset.item);
+      item.checked = !item.checked;
+      saveAcq();
+      renderAcq();
+    } else if (action === 'acq-remove-item') {
+      cat.items = cat.items.filter(i => i.id !== el.dataset.item);
+      saveAcq();
+      renderAcq();
+    } else if (action === 'acq-add-item') {
+      const input = document.querySelector(`input[data-cat="${catId}"][data-role="acq-draft-input"]`);
+      const text = input.value.trim();
+      if (!text) return;
+      cat.items.push({ id: 'custom-' + uid(), label: text, checked: false });
+      saveAcq();
+      renderAcq();
+    } else if (action === 'acq-reset-cat') {
+      cat.items.forEach(i => (i.checked = false));
+      saveAcq();
+      renderAcq();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.dataset && e.target.dataset.role === 'acq-draft-input') {
+      const catId = e.target.dataset.cat;
+      document.querySelector(`[data-action="acq-add-item"][data-cat="${catId}"]`).click();
+    }
+  });
+
+  // ---------- Tabs ----------
+  const tabProjectsBtn = document.getElementById('tabProjectsBtn');
+  const tabTripsBtn = document.getElementById('tabTripsBtn');
+  const tabKinoBtn = document.getElementById('tabKinoBtn');
+  const projectsSection = document.getElementById('projectsSection');
+  const tripsSection = document.getElementById('tripsSection');
+  const kinoSection = document.getElementById('kinoSection');
+
+  const TABS = {
+    projects: { btn: tabProjectsBtn, section: projectsSection },
+    trips: { btn: tabTripsBtn, section: tripsSection },
+    kino: { btn: tabKinoBtn, section: kinoSection },
+  };
+
+  function showTab(tab) {
+    Object.keys(TABS).forEach((key) => {
+      const isActive = key === tab;
+      TABS[key].section.classList.toggle('hidden', !isActive);
+      TABS[key].btn.classList.toggle('active', isActive);
+    });
+  }
+  tabProjectsBtn.addEventListener('click', () => showTab('projects'));
+  tabTripsBtn.addEventListener('click', () => showTab('trips'));
+  tabKinoBtn.addEventListener('click', () => showTab('kino'));
+
+  document.getElementById('kinoRefreshBtn').addEventListener('click', () => {
+    const frame = document.getElementById('kinoFrame');
+    frame.src = 'https://norderstedt.cinemotion-kino.de/programmuebersicht/?_=' + Date.now();
+  });
+
+  // ---------- Init ----------
+  (async function init() {
+    try {
+      const p = await window.storage.get('household:projects', true);
+      projects = p ? JSON.parse(p.value) : [];
+    } catch (e) { projects = []; }
+    try {
+      const t = await window.storage.get('household:trips', true);
+      trips = t ? JSON.parse(t.value) : [];
+    } catch (e) { trips = []; }
+    await loadPack();
+    await loadAcq();
+
+    document.getElementById('loading').classList.add('hidden');
+    showTab('projects');
+    renderProjects();
+    renderTrips();
+    renderPack();
+    renderAcq();
+  })();
+</script>
+</body>
+</html>
