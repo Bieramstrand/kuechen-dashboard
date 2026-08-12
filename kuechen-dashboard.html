@@ -288,8 +288,14 @@
     <!-- Kalender -->
     <div class="panel" id="calendarPanel">
       <h2 class="panel-title">Kalender</h2>
-      <div class="calendar-month">
-        <p class="calendar-month-label" id="monthLabel">Januar 2025</p>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+        <div style="flex: 1;">
+          <p class="calendar-month-label" id="monthLabel">Januar 2025</p>
+        </div>
+        <label style="background: #3C6E8F; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap;">
+          📅 ICS laden
+          <input type="file" id="icsUpload" accept=".ics" style="display: none;" />
+        </label>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <div class="calendar-events" id="calendarEvents"></div>
@@ -417,22 +423,95 @@
     setInterval(loadRainViewerData, 5 * 60 * 1000);
   }
 
-  // Kalender aus Speicher laden
+  // Kalender aus Speicher laden (Trips + ICS Uploads)
   async function loadCalendarEvents() {
     let events = [];
+    
     try {
+      // Trips laden
       const trips = await window.storage.get('household:trips', true);
       if (trips) {
         const tripsData = JSON.parse(trips.value);
-        events = tripsData.map(t => ({
+        events = events.concat(tripsData.map(t => ({
           date: new Date(t.start),
           title: t.destination,
           category: 'ocean'
-        }));
+        })));
       }
     } catch (e) {}
+
+    try {
+      // ICS Events laden
+      const icsData = await window.storage.get('household:calendar-ics-events', true);
+      if (icsData) {
+        const parsedEvents = JSON.parse(icsData.value);
+        events = events.concat(parsedEvents.map(e => ({
+          date: new Date(e.dtstart),
+          title: e.summary,
+          category: 'moss'
+        })));
+      }
+    } catch (e) {}
+
     return events;
   }
+
+  // Einfacher ICS Parser
+  function parseICS(icsText) {
+    const events = [];
+    const lines = icsText.split('\n');
+    let event = null;
+
+    for (let line of lines) {
+      line = line.trim();
+      
+      if (line === 'BEGIN:VEVENT') {
+        event = {};
+      } else if (line === 'END:VEVENT' && event) {
+        if (event.dtstart || event.summary) {
+          events.push(event);
+        }
+        event = null;
+      } else if (event && line.includes(':')) {
+        const [key, ...valueParts] = line.split(':');
+        const value = valueParts.join(':');
+        
+        if (key.includes('DTSTART')) {
+          const dateStr = value.replace(/[TZ]/g, '');
+          const year = parseInt(dateStr.substring(0, 4));
+          const month = parseInt(dateStr.substring(4, 6)) - 1;
+          const day = parseInt(dateStr.substring(6, 8));
+          event.dtstart = new Date(year, month, day);
+        } else if (key.includes('DTEND')) {
+          const dateStr = value.replace(/[TZ]/g, '');
+          const year = parseInt(dateStr.substring(0, 4));
+          const month = parseInt(dateStr.substring(4, 6)) - 1;
+          const day = parseInt(dateStr.substring(6, 8));
+          event.dtend = new Date(year, month, day);
+        } else if (key.includes('SUMMARY')) {
+          event.summary = value.replace(/\\,/g, ',').replace(/\\\\/g, '\\');
+        } else if (key.includes('DESCRIPTION')) {
+          event.description = value;
+        }
+      }
+    }
+
+    return events;
+  }
+
+  // ICS Upload Handler
+  document.getElementById('icsUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const events = parseICS(text);
+    
+    await window.storage.set('household:calendar-ics-events', JSON.stringify(events), true);
+    await renderCalendar();
+    
+    alert(`${events.length} Termine geladen!`);
+  });
 
   // Kalender rendern
   async function renderCalendar() {
