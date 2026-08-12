@@ -107,7 +107,7 @@ exports.handler = async (event, context) => {
           time: plannedTime
             ? plannedTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
             : null,
-          delay: dep.delay ? Math.round(dep.delay / 60) : 0,
+          delay: dep.delay ? Math.round(dep.delay) : 0,
           cancelled: !!dep.cancelled,
         };
       });
