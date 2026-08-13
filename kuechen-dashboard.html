@@ -325,7 +325,10 @@
 
     <!-- Wetter/Radar -->
     <div class="panel" id="weatherPanel">
-      <h2 class="panel-title">Regen Radar</h2>
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+        <h2 class="panel-title" style="margin-bottom:0;">Regen Radar</h2>
+        <span id="currentTemp" style="font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem; color:#C4883A;"></span>
+      </div>
       <p class="panel-subtitle">Norderstedt – Nächste 2 Stunden Vorhersage</p>
       <div class="radar-controls" id="timelineControls">
         <button class="time-btn active" data-offset="0">Jetzt</button>
@@ -423,6 +426,20 @@
     return d.innerHTML;
   }
   
+  // Aktuelle Temperatur für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
+  async function loadTemperature() {
+    try {
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.7&longitude=9.98&current=temperature_2m&timezone=Europe%2FBerlin');
+      const data = await res.json();
+      const temp = data.current && data.current.temperature_2m;
+      if (temp != null) {
+        document.getElementById('currentTemp').textContent = `${Math.round(temp)}°C`;
+      }
+    } catch (e) {
+      console.error('Temperatur-Fetch fehlgeschlagen:', e);
+    }
+  }
+
   // RainViewer Karte initialisieren
   function initRainViewer() {
     const map = L.map('rainviewer-map').setView([53.633, 10.000], 11);
@@ -1071,12 +1088,14 @@
   // Initialisierung
   (async function init() {
     initRainViewer();
+    await loadTemperature();
     await renderCalendar();
     await loadHVVData();
     await updateActionsOverview();
     
     // Auto-refresh alle 5 Minuten
     setInterval(async () => {
+      await loadTemperature();
       await renderCalendar();
       await loadHVVData();
       await updateActionsOverview();
