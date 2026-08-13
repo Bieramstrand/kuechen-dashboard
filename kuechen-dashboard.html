@@ -713,6 +713,7 @@
     const events = expandAllRecurrences(rawEvents);
 
     await window.storage.set('household:calendar-ics-events', JSON.stringify(events), true);
+    await window.storage.set('household:calendar-ics-imported-at', Date.now().toString(), true);
     await renderCalendar();
 
     const recurringCount = rawEvents.filter((ev) => ev.rrule).length;
@@ -790,8 +791,18 @@
     
     renderEventsSection(events, eventsByDate);
     
-    const now2 = new Date();
-    document.getElementById('calendarUpdate').textContent = `Aktualisiert: ${now2.toLocaleTimeString('de-DE')}`;
+    const updateEl = document.getElementById('calendarUpdate');
+    try {
+      const importedAt = await window.storage.get('household:calendar-ics-imported-at', true);
+      if (importedAt && importedAt.value) {
+        const d = new Date(parseInt(importedAt.value, 10));
+        updateEl.textContent = `ICS zuletzt geladen: ${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+      } else {
+        updateEl.textContent = 'Noch keine ICS-Datei geladen';
+      }
+    } catch (e) {
+      updateEl.textContent = 'Noch keine ICS-Datei geladen';
+    }
   }
 
   function renderEventsSection(events, eventsByDate) {
