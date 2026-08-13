@@ -103,6 +103,12 @@
       border: 2px solid #D9A441;
       font-weight: 700;
     }
+    .calendar-day.selected {
+      background: #D9A441;
+      color: #2E2A22;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px #3C6E8F inset;
+    }
     .calendar-events {
       font-size: 0.75rem;
       line-height: 1.2;
@@ -264,6 +270,17 @@
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
     .action-card.ocean .action-value { color: #3C6E8F; }
 
+    .shopping-preview {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: #5B5340;
+      line-height: 1.5;
+    }
+    .shopping-preview .more {
+      color: #8A8069;
+      font-style: italic;
+    }
+
     .last-update {
       font-size: 0.7rem;
       color: #C9BF9F;
@@ -321,7 +338,11 @@
     <!-- HVV -->
     <div class="panel" id="hvvPanel">
       <h2 class="panel-title">U-Bahn Garstedt</h2>
-      <p class="panel-subtitle">Richtung Ohlsdorf – Nächste Abfahrten</p>
+      <p class="panel-subtitle" id="hvvSubtitle">Richtung Innenstadt – Nächste Abfahrten</p>
+      <div class="radar-controls" id="hvvDirectionControls">
+        <button class="time-btn active" data-direction="innenstadt">🏙️ Innenstadt / Hbf</button>
+        <button class="time-btn" data-direction="norderstedt">🏠 Norderstedt Mitte</button>
+      </div>
       <div class="hvv-list" id="hvvList">
         <div class="hvv-loading">Wird geladen…</div>
       </div>
@@ -332,9 +353,10 @@
     <div class="panel" id="actionsPanel">
       <h2 class="panel-title">Übersicht diese Woche</h2>
       <div class="actions-grid">
-        <div class="action-card ocean">
+        <div class="action-card ocean" id="shoppingCard" style="cursor:pointer;">
           <span class="action-title">Einkaufsliste</span>
           <span class="action-value" id="shoppingCount">0</span>
+          <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card moss">
           <span class="action-title">Haushalt Tasks</span>
@@ -390,6 +412,12 @@
 </script>
 <script>
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
   
   // RainViewer Karte initialisieren
   function initRainViewer() {
@@ -693,6 +721,8 @@
   });
 
   // Kalender rendern
+  let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "kommende Termine" Ansicht)
+
   async function renderCalendar() {
     const now = new Date();
     const year = now.getFullYear();
@@ -715,7 +745,6 @@
     });
     
     const grid = document.getElementById('calendarGrid');
-    const eventsDiv = document.getElementById('calendarEvents');
     grid.innerHTML = '';
     
     const daysOfWeek = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -742,12 +771,64 @@
       
       if (isToday) dayEl.classList.add('today');
       if (eventsByDate[dateStr]) dayEl.classList.add('has-event');
+      if (calendarSelectedDate === dateStr) dayEl.classList.add('selected');
       
       dayEl.textContent = day;
+      dayEl.style.cursor = 'pointer';
+      dayEl.addEventListener('click', () => {
+        calendarSelectedDate = calendarSelectedDate === dateStr ? null : dateStr; // erneuter Klick hebt Auswahl auf
+        document.querySelectorAll('.calendar-day.selected').forEach((el) => el.classList.remove('selected'));
+        if (calendarSelectedDate) dayEl.classList.add('selected');
+        renderEventsSection(events, eventsByDate);
+      });
       grid.appendChild(dayEl);
     }
     
+    renderEventsSection(events, eventsByDate);
+    
+    const now2 = new Date();
+    document.getElementById('calendarUpdate').textContent = `Aktualisiert: ${now2.toLocaleTimeString('de-DE')}`;
+  }
+
+  function renderEventsSection(events, eventsByDate) {
+    const eventsDiv = document.getElementById('calendarEvents');
     eventsDiv.innerHTML = '';
+    const now = new Date();
+
+    if (calendarSelectedDate) {
+      const dayEvents = (eventsByDate[calendarSelectedDate] || []).slice().sort((a, b) => a.date - b.date);
+      const label = new Date(calendarSelectedDate + 'T00:00:00').toLocaleDateString('de-DE', {
+        weekday: 'long', day: '2-digit', month: '2-digit',
+      });
+
+      const back = document.createElement('div');
+      back.textContent = '← Alle kommenden Termine';
+      back.style.cssText = 'font-size:0.72rem;color:#3C6E8F;cursor:pointer;margin-bottom:6px;text-decoration:underline;';
+      back.addEventListener('click', () => {
+        calendarSelectedDate = null;
+        document.querySelectorAll('.calendar-day.selected').forEach((el) => el.classList.remove('selected'));
+        renderEventsSection(events, eventsByDate);
+      });
+      eventsDiv.appendChild(back);
+
+      const heading = document.createElement('p');
+      heading.textContent = label;
+      heading.style.cssText = 'font-size:0.8rem;font-weight:600;margin:2px 0 6px;';
+      eventsDiv.appendChild(heading);
+
+      if (dayEvents.length === 0) {
+        eventsDiv.innerHTML += '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine Termine an diesem Tag</p>';
+      } else {
+        dayEvents.forEach((ev) => {
+          const evEl = document.createElement('div');
+          evEl.className = `calendar-event ${ev.category}`;
+          evEl.textContent = ev.title;
+          eventsDiv.appendChild(evEl);
+        });
+      }
+      return;
+    }
+
     const upcoming = events
       .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
       .sort((a, b) => a.date - b.date)
@@ -763,13 +844,13 @@
         eventsDiv.appendChild(evEl);
       });
     }
-    
-    const now2 = new Date();
-    document.getElementById('calendarUpdate').textContent = `Aktualisiert: ${now2.toLocaleTimeString('de-DE')}`;
   }
 
   // HVV Echtzeitdaten über HAFAS (BVG-API als Fallback für Hamburg)
   // HVV Daten von Netlify Function laden
+  let hvvDirection = 'innenstadt';
+  let hvvAllDepartures = [];
+
   async function loadHVVData() {
     const listEl = document.getElementById('hvvList');
     try {
@@ -779,20 +860,16 @@
       const data = await response.json();
       
       if (!data.success || !data.departures || data.departures.length === 0) {
+        hvvAllDepartures = [];
         listEl.innerHTML = '<div class="hvv-error">Keine U1-Abfahrten verfügbar</div>';
         return;
       }
       
-      listEl.innerHTML = data.departures.map(dep => `
-        <div class="hvv-item">
-          <div class="hvv-line">U 1</div>
-          <div class="hvv-destination">${dep.destination}</div>
-          <div class="hvv-time">${dep.time} (${dep.minToDepart} min)</div>
-          ${dep.delay > 0 ? `<div class="hvv-delay">Verspätung: +${dep.delay} min</div>` : ''}
-        </div>
-      `).join('');
+      hvvAllDepartures = data.departures;
+      renderHVVList();
     } catch (e) {
       console.error('HVV fetch error:', e);
+      hvvAllDepartures = [];
       listEl.innerHTML = `<div class="hvv-error">HVV-Daten nicht erreichbar</div>`;
     }
     
@@ -800,17 +877,61 @@
     document.getElementById('hvvUpdate').textContent = `Aktualisiert: ${now.toLocaleTimeString('de-DE')}`;
   }
 
+  function renderHVVList() {
+    const listEl = document.getElementById('hvvList');
+    const filtered = hvvAllDepartures.filter((dep) => dep.headsign === hvvDirection).slice(0, 5);
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="hvv-error">Keine U1-Abfahrten in dieser Richtung verfügbar</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(dep => `
+      <div class="hvv-item">
+        <div class="hvv-line">U 1</div>
+        <div class="hvv-destination">${dep.destination}</div>
+        <div class="hvv-time">${dep.time} (${dep.minToDepart} min)</div>
+        ${dep.delay > 0 ? `<div class="hvv-delay">Verspätung: +${dep.delay} min</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  document.querySelectorAll('#hvvDirectionControls .time-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('#hvvDirectionControls .time-btn').forEach((b) => b.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      hvvDirection = e.currentTarget.dataset.direction;
+      document.getElementById('hvvSubtitle').textContent =
+        hvvDirection === 'innenstadt'
+          ? 'Richtung Innenstadt – Nächste Abfahrten'
+          : 'Richtung Norderstedt Mitte – Nächste Abfahrten';
+      renderHVVList();
+    });
+  });
+
   // Aktions-Übersicht aktualisieren
   async function updateActionsOverview() {
     try {
       // Einkaufsliste (aus dem Einkaufszettel-Projekt)
       const shopping = await window.storage.get('shoppingapp:items', true);
+      const previewEl = document.getElementById('shoppingPreview');
       if (shopping) {
         const shopData = JSON.parse(shopping.value);
-        const openCount = shopData.filter((i) => !i.checked).length;
-        document.getElementById('shoppingCount').textContent = openCount;
+        const open = shopData.filter((i) => !i.checked);
+        document.getElementById('shoppingCount').textContent = open.length;
+
+        const preview = open.slice(-5).reverse(); // zuletzt hinzugefügte zuerst
+        if (preview.length === 0) {
+          previewEl.innerHTML = '';
+        } else {
+          const rest = open.length - preview.length;
+          previewEl.innerHTML =
+            preview.map((i) => `• ${escapeHtml(i.n)}`).join('<br>') +
+            (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
+        }
       } else {
         document.getElementById('shoppingCount').textContent = '0';
+        previewEl.innerHTML = '';
       }
       
       // Was essen wir heute
@@ -878,7 +999,7 @@
       }
     }
 
-    if (e.target.id === 'shoppingCount') {
+    if (e.target.closest('#shoppingCard')) {
       const itemInput = prompt('Was soll auf die Einkaufsliste? (mehrere Artikel mit Komma trennen)');
       if (itemInput !== null && itemInput.trim()) {
         const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
