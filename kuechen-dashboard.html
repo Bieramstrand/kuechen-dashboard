@@ -927,12 +927,12 @@
   // Aktions-Übersicht aktualisieren
   async function updateActionsOverview() {
     try {
-      // Einkaufsliste (aus dem Einkaufszettel-Projekt)
+      // Einkaufsliste (nur Artikel, die über das Dashboard hinzugefügt wurden)
       const shopping = await window.storage.get('shoppingapp:items', true);
       const previewEl = document.getElementById('shoppingPreview');
       if (shopping) {
         const shopData = JSON.parse(shopping.value);
-        const open = shopData.filter((i) => !i.checked);
+        const open = shopData.filter((i) => !i.checked && i.addedVia === 'dashboard');
         document.getElementById('shoppingCount').textContent = open.length;
 
         const preview = open.slice(-5).reverse(); // zuletzt hinzugefügte zuerst
@@ -1057,6 +1057,7 @@
               i: '📝',
               checked: false,
               qty: 1,
+              addedVia: 'dashboard',
             });
           }
         });
