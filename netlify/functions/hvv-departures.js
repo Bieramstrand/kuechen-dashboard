@@ -89,20 +89,25 @@ exports.handler = async (event, context) => {
 
     const departures = dlResponse.departures || [];
 
-    // 3. Auf U1 Richtung Ohlsdorf filtern
+    // 3. Auf U1 filtern, beide Richtungen behalten (Richtung wird pro Zug mitgegeben)
     const u1 = departures
       .filter((dep) => {
         const lineName = dep.line && dep.line.name;
         return lineName && lineName.replace(/\s/g, '').toUpperCase() === 'U1';
       })
-      .slice(0, 5)
+      .slice(0, 20)
       .map((dep) => {
         const plannedTime = dep.timeOffset != null
           ? new Date(Date.now() + dep.timeOffset * 60000)
           : null;
+        const destination = (dep.line && dep.line.direction) || dep.direction || '';
+        // Garstedt liegt zwischen Norderstedt Mitte (Endstation Norden) und der Innenstadt
+        // (Ohlsdorf, Hauptbahnhof, weiter Richtung Volksdorf/Ohlstedt/Großhansdorf)
+        const headsign = /norderstedt/i.test(destination) ? 'norderstedt' : 'innenstadt';
         return {
           line: dep.line.name,
-          destination: (dep.line && dep.line.direction) || dep.direction || 'Ohlsdorf',
+          destination: destination || (headsign === 'norderstedt' ? 'Norderstedt Mitte' : 'Innenstadt'),
+          headsign,
           minToDepart: dep.timeOffset != null ? dep.timeOffset : null,
           time: plannedTime
             ? plannedTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
