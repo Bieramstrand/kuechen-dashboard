@@ -176,6 +176,63 @@
       color: #FBF8F1;
       border-color: #3C6E8F;
     }
+    .radar-timeline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .radar-play-btn {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #3C6E8F;
+      color: #FBF8F1;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-play-btn:active {
+      background: #2E5A75;
+    }
+    .radar-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #E4DCC5;
+      outline: none;
+    }
+    .radar-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D9A441;
+      border: 3px solid #FBF8F1;
+      box-shadow: 0 1px 4px rgba(42,36,23,0.3);
+      cursor: pointer;
+    }
+    .radar-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D9A441;
+      border: 3px solid #FBF8F1;
+      cursor: pointer;
+    }
+    .radar-now-mark {
+      text-align: center;
+      font-size: 0.68rem;
+      color: #8A8069;
+      margin-top: -2px;
+    }
     .current-time {
       font-size: 0.8rem;
       color: #8A8069;
@@ -330,11 +387,9 @@
         <span id="currentTemp" style="font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem; color:#C4883A;"></span>
       </div>
       <p class="panel-subtitle">Norderstedt – Nächste 2 Stunden Vorhersage</p>
-      <div class="radar-controls" id="timelineControls">
-        <button class="time-btn active" data-offset="0">Jetzt</button>
-        <button class="time-btn" data-offset="30">+30 Min</button>
-        <button class="time-btn" data-offset="60">+60 Min</button>
-        <button class="time-btn" data-offset="90">+90 Min</button>
+      <div class="radar-timeline">
+        <button id="radarPlayBtn" class="radar-play-btn" aria-label="Abspielen">▶</button>
+        <input type="range" id="radarSlider" class="radar-slider" min="0" max="0" value="0" step="1" />
       </div>
       <div class="current-time" id="currentTimeDisplay"></div>
       <div class="radar-container">
@@ -365,9 +420,9 @@
           <span class="action-value" id="shoppingCount">0</span>
           <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
-        <div class="action-card moss">
-          <span class="action-title">Haushalt Tasks</span>
-          <span class="action-value" id="householdTasks">0/0</span>
+        <div class="action-card moss" id="householdCard" style="cursor:pointer;">
+          <span class="action-title">Haushalt Aufgaben</span>
+          <span class="action-value" id="householdTasks">0</span>
         </div>
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
@@ -452,60 +507,79 @@
     const RainViewerApiKey = '5ec59eb0ff9a9b000b8e7a3b';
     
     let rainLayer = null;
-    let timestamps = [];
-    let selectedOffset = 0;
+    let frames = []; // { time, isNow }
+    let currentIndex = 0;
+    let playing = false;
+    let playTimer = null;
+
+    const slider = document.getElementById('radarSlider');
+    const playBtn = document.getElementById('radarPlayBtn');
 
     function loadRainViewerData() {
       fetch(`https://api.rainviewer.com/public/weather-maps-api-free.json?key=${RainViewerApiKey}`)
         .then(res => res.json())
         .then(data => {
-          timestamps = data.radar.nowcast || [];
-          if (timestamps.length > 0) {
-            updateRainLayer(selectedOffset);
-          }
+          const past = (data.radar.past || []).map(f => ({ time: f[0] }));
+          const nowcast = (data.radar.nowcast || []).map(f => ({ time: f[0] }));
+          frames = past.concat(nowcast);
+          if (frames.length === 0) return;
+
+          slider.max = frames.length - 1;
+          // Start-Position: letztes "past"-Frame = "jetzt"
+          const nowIndex = past.length > 0 ? past.length - 1 : 0;
+          currentIndex = nowIndex;
+          slider.value = currentIndex;
+          updateRainLayer(currentIndex);
         })
         .catch(e => console.error('RainViewer load error:', e));
     }
 
-    function updateRainLayer(offsetMinutes) {
+    function updateRainLayer(index) {
+      const frame = frames[index];
+      if (!frame) return;
+      currentIndex = index;
+
       if (rainLayer) map.removeLayer(rainLayer);
-      
+      const url = `https://tilecache.rainviewer.com/v2/radar/${frame.time}/512/{z}/{x}/{y}/2/1_1.png`;
+      rainLayer = L.tileLayer(url, {
+        tms: false,
+        opacity: 0.7,
+        maxZoom: 18
+      }).addTo(map);
+
+      const displayTime = new Date(frame.time * 1000);
       const now = new Date();
-      const targetTime = new Date(now.getTime() + offsetMinutes * 60000);
-      const targetTimestamp = Math.floor(targetTime.getTime() / 1000);
-      
-      // Finde den nächsten verfügbaren Zeitstempel
-      let closest = timestamps[0];
-      for (let ts of timestamps) {
-        if (Math.abs(ts[0] - targetTimestamp) < Math.abs(closest[0] - targetTimestamp)) {
-          closest = ts;
-        }
-      }
-      
-      if (closest) {
-        const url = `https://tilecache.rainviewer.com/v2/radar/${closest[0]}/512/{z}/{x}/{y}/2/1_1.png`;
-        rainLayer = L.tileLayer(url, {
-          tms: false,
-          opacity: 0.7,
-          maxZoom: 18
-        }).addTo(map);
-        
-        // Zeit anzeigen
-        const displayTime = new Date(closest[0] * 1000);
-        const timeStr = displayTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('currentTimeDisplay').textContent = timeStr + ' Uhr';
-      }
+      const isFuture = displayTime > now;
+      const timeStr = displayTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('currentTimeDisplay').textContent =
+        timeStr + ' Uhr' + (isFuture ? ' (Vorhersage)' : '');
     }
 
-    // Button-Handler
-    document.querySelectorAll('.time-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        
-        selectedOffset = parseInt(e.target.dataset.offset);
-        updateRainLayer(selectedOffset);
-      });
+    slider.addEventListener('input', (e) => {
+      stopPlaying();
+      updateRainLayer(parseInt(e.target.value, 10));
+    });
+
+    function stepFrame() {
+      let next = currentIndex + 1;
+      if (next > frames.length - 1) next = 0; // von vorn beginnen
+      slider.value = next;
+      updateRainLayer(next);
+    }
+
+    function startPlaying() {
+      if (frames.length === 0) return;
+      playing = true;
+      playBtn.textContent = '⏸';
+      playTimer = setInterval(stepFrame, 700);
+    }
+    function stopPlaying() {
+      playing = false;
+      playBtn.textContent = '▶';
+      if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    }
+    playBtn.addEventListener('click', () => {
+      if (playing) stopPlaying(); else startPlaying();
     });
 
     loadRainViewerData();
@@ -980,17 +1054,14 @@
         document.getElementById('todaysMeal').textContent = '—';
       }
       
-      // Haushalt Tasks
-      const tasks = await window.storage.get('household:tasks', true);
-      if (tasks) {
-        const tasksData = JSON.parse(tasks.value);
-        const today = new Date().toISOString().split('T')[0];
-        const todaysTasks = tasksData.filter(t => t.date === today);
-        const completed = todaysTasks.filter(t => t.done).length;
-        const total = todaysTasks.length;
-        document.getElementById('householdTasks').textContent = completed + '/' + total;
+      // Haushalt Aufgaben (aus der Pinnwand App)
+      const pinnwandTasks = await window.storage.get('tasks', true);
+      if (pinnwandTasks) {
+        const tasksData = JSON.parse(pinnwandTasks.value);
+        const open = tasksData.filter(t => t.status === 'offen').length;
+        document.getElementById('householdTasks').textContent = open;
       } else {
-        document.getElementById('householdTasks').textContent = '0/0';
+        document.getElementById('householdTasks').textContent = '0';
       }
       
     } catch (e) {
@@ -1009,26 +1080,8 @@
       }
     }
     
-    if (e.target.id === 'householdTasks') {
-      const taskInput = prompt('Neue Task für heute (z.B. "Küche putzen, Wäsche waschen")');
-      if (taskInput !== null && taskInput.trim()) {
-        const today = new Date().toISOString().split('T')[0];
-        let tasksData = [];
-        try {
-          const existing = await window.storage.get('household:tasks', true);
-          if (existing) tasksData = JSON.parse(existing.value);
-        } catch (e) {}
-        
-        tasksData.push({
-          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-          date: today,
-          text: taskInput.trim(),
-          done: false
-        });
-        
-        await window.storage.set('household:tasks', JSON.stringify(tasksData), true);
-        await updateActionsOverview();
-      }
+    if (e.target.closest('#householdCard')) {
+      window.open('pinnwand.html', '_blank');
     }
 
     if (e.target.closest('#shoppingCard')) {
