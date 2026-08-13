@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Küche" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#3C6E8F" />
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADFklEQVR4nO3bvZWcRRBA0RGHsOSQCgHIVBA4yoBUSA1jOULAPrHa+avuvtccq7rqnc+bDx8/fbnAa3569gDMJQ6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJI5/+OO3X589wiDi+NtLGfr4Shx/+bYJfbwQx+XyWg36uIjj0h3o4/Q4vl/A4X0cHcdbbn9yH+fG8farH9vHoXH86L3P7OPEON536QP7OC6Oa258Wh9nxXH9dY/q46A4bnXXc/o4JY7bXvSQPo6I4x63PKGP/eO43xW372PzOO59v7372DmOx1xu4z62jeORN9u1jz3jePy1tuxjwziedaf9+tgtjudeaLM+topjwm0mzHAr+8Qx5ypzJrnSJnFMu8e0ed5nhzhmXmLmVD9k+Tgm32DybG+xdhzztz9/wu9YOI5V9r7KnP+1ahxrbXytab9aMo4Vd73izOvFseKWXyw3+WJxLLfff1lr/pXiWGuzZaFXLBPHQjv9X6u8ZY04Vtnm2y3xogXiWGKP7zD/XdPjmL/Bawx/3eg4hu/uJia/cW4ck7d2W2NfOjSOsfu6k5nvnRjHzE3d28BXj4tj4I4eZtrbZ8UxbTuPN2oDg+IYtZcnmrOHKXHM2cgEQ7YxIo4huxhlwk5+fvYAl8vl8svn31/9fcKCHqCe/3QjvhzMJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA7SiL9DPtKV/z085B+aL3w5SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgffj46cuzZ2AoXw6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImD9CdY0qZR46RxJQAAAABJRU5ErkJggg==" />
   <title>Küchen Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -112,7 +116,7 @@
     .calendar-events {
       font-size: 0.75rem;
       line-height: 1.2;
-      max-height: 120px;
+      max-height: 340px;
       overflow-y: auto;
     }
     .calendar-event {
@@ -832,7 +836,7 @@
     const upcoming = events
       .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
       .sort((a, b) => a.date - b.date)
-      .slice(0, 5);
+      .slice(0, 7);
 
     if (upcoming.length === 0) {
       eventsDiv.innerHTML = '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine kommenden Termine</p>';
