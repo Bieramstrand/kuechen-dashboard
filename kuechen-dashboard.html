@@ -423,6 +423,7 @@
         <div class="action-card moss" id="householdCard" style="cursor:pointer;">
           <span class="action-title">Haushalt Aufgaben</span>
           <span class="action-value" id="householdTasks">0</span>
+          <div id="householdPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
@@ -1056,12 +1057,24 @@
       
       // Haushalt Aufgaben (aus der Pinnwand App)
       const pinnwandTasks = await window.storage.get('tasks', true);
+      const householdPreviewEl = document.getElementById('householdPreview');
       if (pinnwandTasks) {
         const tasksData = JSON.parse(pinnwandTasks.value);
-        const open = tasksData.filter(t => t.status === 'offen').length;
-        document.getElementById('householdTasks').textContent = open;
+        const open = tasksData.filter(t => t.status === 'offen').sort((a, b) => b.createdAt - a.createdAt);
+        document.getElementById('householdTasks').textContent = open.length;
+
+        const preview = open.slice(0, 5);
+        if (preview.length === 0) {
+          householdPreviewEl.innerHTML = '';
+        } else {
+          const rest = open.length - preview.length;
+          householdPreviewEl.innerHTML =
+            preview.map((t) => `• ${escapeHtml(t.title)}`).join('<br>') +
+            (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
+        }
       } else {
         document.getElementById('householdTasks').textContent = '0';
+        householdPreviewEl.innerHTML = '';
       }
       
     } catch (e) {
@@ -1081,7 +1094,7 @@
     }
     
     if (e.target.closest('#householdCard')) {
-      window.open('pinnwand.html', '_blank');
+      window.open('https://diepinnwand.netlify.app', '_blank');
     }
 
     if (e.target.closest('#shoppingCard')) {
