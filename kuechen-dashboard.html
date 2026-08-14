@@ -1068,10 +1068,23 @@
     if (upcoming.length === 0) {
       eventsDiv.innerHTML = '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine kommenden Termine</p>';
     } else {
+      // Nach Tag gruppieren, statt Datum in jeder einzelnen Zeile zu wiederholen
+      let lastKey = null;
       upcoming.forEach((ev) => {
+        const key = localDateKey(ev.date);
+        if (key !== lastKey) {
+          const heading = document.createElement('p');
+          heading.textContent = ev.date.toLocaleDateString('de-DE', {
+            weekday: 'long', day: '2-digit', month: '2-digit',
+          });
+          heading.style.cssText = 'font-size:0.78rem;font-weight:600;color:#2E2A22;margin:10px 0 4px;';
+          if (lastKey === null) heading.style.marginTop = '0';
+          eventsDiv.appendChild(heading);
+          lastKey = key;
+        }
         const evEl = document.createElement('div');
         evEl.className = `calendar-event ${ev.category}`;
-        evEl.textContent = `${ev.date.toLocaleDateString('de-DE')}: ${ev.title}`;
+        evEl.textContent = ev.title;
         eventsDiv.appendChild(evEl);
       });
     }
