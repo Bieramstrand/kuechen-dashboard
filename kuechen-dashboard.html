@@ -854,6 +854,20 @@
   // (BYDAY/BYMONTHDAY werden nicht ausgewertet - reicht für typische Haushalts-Termine wie Mülltonnen, Serientermine)
   function expandRecurrence(event, rangeStart, rangeEnd) {
     if (!event.rrule) {
+      // Mehrtägiger Termin (z.B. "Sperrung U1 vom 10.–20.08.") – an jedem Tag im Zeitraum zeigen,
+      // nicht nur am Starttag (der könnte längst in der Vergangenheit liegen, während der Termin noch läuft)
+      if (event.dtend && (event.dtend - event.dtstart) > 20 * 60 * 60 * 1000) {
+        const results = [];
+        let d = new Date(event.dtstart.getFullYear(), event.dtstart.getMonth(), event.dtstart.getDate());
+        const endDay = new Date(event.dtend.getFullYear(), event.dtend.getMonth(), event.dtend.getDate());
+        let iter = 0;
+        while (d < endDay && iter < 400) {
+          if (d >= rangeStart && d <= rangeEnd) results.push(new Date(d));
+          d = addDays(d, 1);
+          iter++;
+        }
+        return results;
+      }
       return event.dtstart >= rangeStart && event.dtstart <= rangeEnd ? [event.dtstart] : [];
     }
 
