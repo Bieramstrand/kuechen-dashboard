@@ -943,7 +943,7 @@
   });
 
   // Kalender rendern
-  let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "kommende Termine" Ansicht)
+  let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "alle kommenden Termine" Ansicht)
 
   async function renderCalendar() {
     const now = new Date();
@@ -1063,8 +1063,7 @@
 
     const upcoming = events
       .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
-      .sort((a, b) => a.date - b.date)
-      .slice(0, 7);
+      .sort((a, b) => a.date - b.date);
 
     if (upcoming.length === 0) {
       eventsDiv.innerHTML = '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine kommenden Termine</p>';
