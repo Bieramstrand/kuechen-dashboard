@@ -359,6 +359,77 @@
       background: #C9BF9F;
       border-radius: 3px;
     }
+
+    /* Eigenes Eingabefenster statt Browser-prompt() */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(42, 36, 23, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: #FBF8F1;
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 12px 40px rgba(42,36,23,0.35);
+      border: 1px solid #E4DCC5;
+    }
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: #2E2A22;
+      margin: 0 0 6px;
+    }
+    .modal-hint {
+      font-size: 0.8rem;
+      color: #8A8069;
+      margin: 0 0 14px;
+    }
+    .modal-input {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      padding: 12px 14px;
+      border: 1.5px solid #E4DCC5;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: #2E2A22;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .modal-input:focus { border-color: #3C6E8F; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .modal-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .modal-btn.cancel {
+      background: transparent;
+      color: #8A8069;
+    }
+    .modal-btn.ok {
+      background: #3C6E8F;
+      color: #FBF8F1;
+    }
+    .modal-btn.ok:active { background: #2E5A75; }
   </style>
 </head>
 <body>
@@ -432,6 +503,19 @@
     </div>
   </div>
 
+  <!-- Eigenes Eingabefenster statt Browser-prompt() -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal-card">
+      <p class="modal-title" id="modalTitle">Titel</p>
+      <p class="modal-hint" id="modalHint"></p>
+      <input type="text" class="modal-input" id="modalInput" />
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="modalCancelBtn">Abbrechen</button>
+        <button class="modal-btn ok" id="modalOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -475,10 +559,51 @@
 <script>
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
 
+  // Eigenes Eingabefenster statt Browser-prompt() – gleiche Nutzung: await customPrompt(titel, hinweis)
+  function customPrompt(title, hint) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('modalOverlay');
+      const input = document.getElementById('modalInput');
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalHint').textContent = hint || '';
+      input.value = '';
+      overlay.classList.remove('hidden');
+      setTimeout(() => input.focus(), 50);
+
+      function cleanup(result) {
+        overlay.classList.add('hidden');
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+        resolve(result);
+      }
+      const okBtn = document.getElementById('modalOkBtn');
+      const cancelBtn = document.getElementById('modalCancelBtn');
+      function onOk() { cleanup(input.value); }
+      function onCancel() { cleanup(null); }
+      function onKeydown(e) {
+        if (e.key === 'Enter') onOk();
+        if (e.key === 'Escape') onCancel();
+      }
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+    });
+  }
+
   function escapeHtml(str) {
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+  }
+
+  // Liefert TT-MM-JJJJ als lokales Datum (NICHT über toISOString, das würde wegen
+  // Zeitzone/Sommerzeit auf den falschen Tag verschieben können)
+  function localDateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
   
   // Aktuelle Temperatur für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
@@ -835,7 +960,7 @@
     const events = await loadCalendarEvents();
     const eventsByDate = {};
     events.forEach(e => {
-      const key = e.date.toISOString().split('T')[0];
+      const key = localDateKey(e.date);
       if (!eventsByDate[key]) eventsByDate[key] = [];
       eventsByDate[key].push(e);
     });
@@ -862,8 +987,8 @@
       dayEl.className = 'calendar-day';
       
       const currentDate = new Date(year, month, day);
-      const dateStr = currentDate.toISOString().split('T')[0];
-      const isToday = dateStr === now.toISOString().split('T')[0];
+      const dateStr = localDateKey(currentDate);
+      const isToday = dateStr === localDateKey(now);
       
       if (isToday) dayEl.classList.add('today');
       if (eventsByDate[dateStr]) dayEl.classList.add('has-event');
@@ -1044,7 +1169,7 @@
       const mealData = await window.storage.get('household:todays-meal', true);
       if (mealData) {
         const meal = JSON.parse(mealData.value);
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateKey(new Date());
         if (meal.date === today) {
           document.getElementById('todaysMeal').textContent = meal.text || '—';
         } else {
@@ -1058,7 +1183,7 @@
       const tasks = await window.storage.get('household:tasks', true);
       if (tasks) {
         const tasksData = JSON.parse(tasks.value);
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateKey(new Date());
         const todaysTasks = tasksData.filter(t => t.date === today);
         const completed = todaysTasks.filter(t => t.done).length;
         const total = todaysTasks.length;
@@ -1075,18 +1200,18 @@
   // Click Handler für Meal, Tasks und HVV
   document.addEventListener('click', async (e) => {
     if (e.target.id === 'todaysMeal') {
-      const input = prompt('Was essen wir heute?');
+      const input = await customPrompt('Was essen wir heute?', 'z.B. "Pasta Bolognese"');
       if (input !== null) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateKey(new Date());
         await window.storage.set('household:todays-meal', JSON.stringify({ date: today, text: input }), true);
         document.getElementById('todaysMeal').textContent = input || '—';
       }
     }
     
     if (e.target.id === 'householdTasks') {
-      const taskInput = prompt('Neue Task für heute (z.B. "Küche putzen, Wäsche waschen")');
+      const taskInput = await customPrompt('Neue Notiz für die Pinnwand', 'z.B. "Küche putzen, Wäsche waschen"');
       if (taskInput !== null && taskInput.trim()) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateKey(new Date());
         let tasksData = [];
         try {
           const existing = await window.storage.get('household:tasks', true);
@@ -1106,7 +1231,7 @@
     }
 
     if (e.target.closest('#shoppingCard')) {
-      const itemInput = prompt('Was soll auf die Einkaufsliste? (mehrere Artikel mit Komma trennen)');
+      const itemInput = await customPrompt('Was soll auf die Einkaufsliste?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"');
       if (itemInput !== null && itemInput.trim()) {
         const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
 
