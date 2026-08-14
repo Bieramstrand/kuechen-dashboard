@@ -631,10 +631,9 @@
       maxZoom: 18
     }).addTo(map);
 
-    const RainViewerApiKey = '5ec59eb0ff9a9b000b8e7a3b';
-    
     let rainLayer = null;
-    let frames = []; // { time, isNow }
+    let frames = []; // { time, path }
+    let tileHost = 'https://tilecache.rainviewer.com';
     let currentIndex = 0;
     let playing = false;
     let playTimer = null;
@@ -643,11 +642,13 @@
     const playBtn = document.getElementById('radarPlayBtn');
 
     function loadRainViewerData() {
-      fetch(`https://api.rainviewer.com/public/weather-maps-api-free.json?key=${RainViewerApiKey}`)
+      // Offizielle kostenlose RainViewer-API, kein Schlüssel nötig
+      fetch('https://api.rainviewer.com/public/weather-maps.json')
         .then(res => res.json())
         .then(data => {
-          const past = (data.radar.past || []).map(f => ({ time: f[0] }));
-          const nowcast = (data.radar.nowcast || []).map(f => ({ time: f[0] }));
+          tileHost = data.host || tileHost;
+          const past = (data.radar && data.radar.past) || [];
+          const nowcast = (data.radar && data.radar.nowcast) || [];
           frames = past.concat(nowcast);
           if (frames.length === 0) return;
 
@@ -667,7 +668,7 @@
       currentIndex = index;
 
       if (rainLayer) map.removeLayer(rainLayer);
-      const url = `https://tilecache.rainviewer.com/v2/radar/${frame.time}/512/{z}/{x}/{y}/2/1_1.png`;
+      const url = `${tileHost}${frame.path}/512/{z}/{x}/{y}/2/1_1.png`;
       rainLayer = L.tileLayer(url, {
         tms: false,
         opacity: 0.7,
