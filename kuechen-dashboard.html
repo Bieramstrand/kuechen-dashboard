@@ -420,10 +420,9 @@
           <span class="action-value" id="shoppingCount">0</span>
           <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
-        <div class="action-card moss" id="householdCard" style="cursor:pointer;">
-          <span class="action-title">Haushalt Aufgaben</span>
-          <span class="action-value" id="householdTasks">0</span>
-          <div id="householdPreview" class="shopping-preview"></div>
+        <div class="action-card moss">
+          <span class="action-title">Pinnwand</span>
+          <span class="action-value" id="householdTasks">0/0</span>
         </div>
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
@@ -1055,26 +1054,17 @@
         document.getElementById('todaysMeal').textContent = '—';
       }
       
-      // Haushalt Aufgaben (aus der Pinnwand App)
-      const pinnwandTasks = await window.storage.get('tasks', true);
-      const householdPreviewEl = document.getElementById('householdPreview');
-      if (pinnwandTasks) {
-        const tasksData = JSON.parse(pinnwandTasks.value);
-        const open = tasksData.filter(t => t.status === 'offen').sort((a, b) => b.createdAt - a.createdAt);
-        document.getElementById('householdTasks').textContent = open.length;
-
-        const preview = open.slice(0, 5);
-        if (preview.length === 0) {
-          householdPreviewEl.innerHTML = '';
-        } else {
-          const rest = open.length - preview.length;
-          householdPreviewEl.innerHTML =
-            preview.map((t) => `• ${escapeHtml(t.title)}`).join('<br>') +
-            (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
-        }
+      // Haushalt Tasks
+      const tasks = await window.storage.get('household:tasks', true);
+      if (tasks) {
+        const tasksData = JSON.parse(tasks.value);
+        const today = new Date().toISOString().split('T')[0];
+        const todaysTasks = tasksData.filter(t => t.date === today);
+        const completed = todaysTasks.filter(t => t.done).length;
+        const total = todaysTasks.length;
+        document.getElementById('householdTasks').textContent = completed + '/' + total;
       } else {
-        document.getElementById('householdTasks').textContent = '0';
-        householdPreviewEl.innerHTML = '';
+        document.getElementById('householdTasks').textContent = '0/0';
       }
       
     } catch (e) {
@@ -1093,8 +1083,26 @@
       }
     }
     
-    if (e.target.closest('#householdCard')) {
-      window.location.href = 'https://diepinnwand.netlify.app';
+    if (e.target.id === 'householdTasks') {
+      const taskInput = prompt('Neue Task für heute (z.B. "Küche putzen, Wäsche waschen")');
+      if (taskInput !== null && taskInput.trim()) {
+        const today = new Date().toISOString().split('T')[0];
+        let tasksData = [];
+        try {
+          const existing = await window.storage.get('household:tasks', true);
+          if (existing) tasksData = JSON.parse(existing.value);
+        } catch (e) {}
+        
+        tasksData.push({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+          date: today,
+          text: taskInput.trim(),
+          done: false
+        });
+        
+        await window.storage.set('household:tasks', JSON.stringify(tasksData), true);
+        await updateActionsOverview();
+      }
     }
 
     if (e.target.closest('#shoppingCard')) {
