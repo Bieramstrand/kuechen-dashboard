@@ -366,34 +366,6 @@
       font-style: italic;
     }
 
-    .app-icon-link {
-      position: relative;
-      display: inline-flex;
-      flex-shrink: 0;
-      line-height: 0;
-    }
-    .app-icon-link img {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      display: block;
-      box-shadow: 0 1px 3px rgba(42,36,23,0.25);
-    }
-    .app-icon-badge {
-      position: absolute;
-      bottom: -4px;
-      right: -4px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #FBF8F1;
-      border: 1px solid #E4DCC5;
-      font-size: 0.55rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #2E2A22;
-    }
 
     .app-launch-card {
       background: #F1ECDD;
@@ -568,25 +540,23 @@
       <h2 class="panel-title">Übersicht diese Woche</h2>
       <div class="actions-grid">
         <div class="action-card ocean" id="shoppingCard" style="cursor:pointer;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-            <span class="action-title" style="margin-bottom:0;">Einkaufsliste</span>
-            <a class="app-icon-link" href="https://homedashboardeinkaufszettel.netlify.app" target="_blank" rel="noopener"
-               onclick="event.stopPropagation()" title="Einkaufszettel App öffnen">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC80lEQVR4nO3du3FTURRAUZuhBic4wi2QUAM9UBw9UAMJNZDRBwkR1haybOkdvbtW6JFm3mfr6F5rNLp/eHq8g0PebX0AzCUOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0vutD2CEXz9/PP/jx0+fr38ko9yv/F3Zg008t2wl676tnFjGix65MytOjrNv9mojZLnJ8ZoxsNoIWSuO19/dpfpYKI63uq/r9GEr+9c/64l1CjhilQXpkZt9ZJl53rN2Y4m3lbPv8Xnd7MYScZRTXv0rTIiy/zjqJX76Xa9H7n547D+Og146D9acHzuP49Iv7n0Pj53HcdB5Y2DB4bFiHJxIHKQ9x3GdBcGOlx17juOg1ywdVlt2LBcHpxMHSRwkcZBW+cieM5gcJHGQxEESB0kcJHGQbuOrCbv8cGv+JzUmB0kcJHGQbiCOXS447m7hvG4gDrYiDpI4SOIgiYN0G/8hvZzf378ef8CHL9+ucyQDTZ8c8/d7rzH87KbHwYbEQRIHSRwkcZBGxzF8Mf8mJp/j6DjYljhI4iCJgyQOkjhIc+OYvMd7W2PPdG4cbE4cJHGQxEESB0kcpKFxjN3dXcjM8x0aBxOIgyQOkjhI4iCJgzQxjpn7uksbeNYT42AIcZDEQRIHSRykcXEMXLRfzbRzHxcHc4iDJA6SOEjiIImDNCuOaXu56xt1BWbFwSjiIImDJA6SOEjiIA2KY9QubkNzrsOgOJhGHCRxkMRBEgdpShxzlugTDLkaq/906Mq/DPpfUyYHA4mDJA6SOEjiII2IY8jObZQJ12REHMwkDpI4SPcPT49bHwNDmRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQfoDKkd/7QPzORQAAAAASUVORK5CYII=" alt="" />
-              <span class="app-icon-badge">↗</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <a href="https://homedashboardeinkaufszettel.netlify.app" target="_blank" rel="noopener"
+               onclick="event.stopPropagation()" title="Einkaufszettel App öffnen" style="flex-shrink:0; line-height:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC80lEQVR4nO3du3FTURRAUZuhBic4wi2QUAM9UBw9UAMJNZDRBwkR1haybOkdvbtW6JFm3mfr6F5rNLp/eHq8g0PebX0AzCUOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0vutD2CEXz9/PP/jx0+fr38ko9yv/F3Zg008t2wl676tnFjGix65MytOjrNv9mojZLnJ8ZoxsNoIWSuO19/dpfpYKI63uq/r9GEr+9c/64l1CjhilQXpkZt9ZJl53rN2Y4m3lbPv8Xnd7MYScZRTXv0rTIiy/zjqJX76Xa9H7n547D+Og146D9acHzuP49Iv7n0Pj53HcdB5Y2DB4bFiHJxIHKQ9x3GdBcGOlx17juOg1ywdVlt2LBcHpxMHSRwkcZBW+cieM5gcJHGQxEESB0kcJHGQbuOrCbv8cGv+JzUmB0kcJHGQbiCOXS447m7hvG4gDrYiDpI4SOIgiYN0G/8hvZzf378ef8CHL9+ucyQDTZ8c8/d7rzH87KbHwYbEQRIHSRwkcZBGxzF8Mf8mJp/j6DjYljhI4iCJgyQOkjhIc+OYvMd7W2PPdG4cbE4cJHGQxEESB0kcpKFxjN3dXcjM8x0aBxOIgyQOkjhI4iCJgzQxjpn7uksbeNYT42AIcZDEQRIHSRykcXEMXLRfzbRzHxcHc4iDJA6SOEjiIImDNCuOaXu56xt1BWbFwSjiIImDJA6SOEjiIA2KY9QubkNzrsOgOJhGHCRxkMRBEgdpShxzlugTDLkaq/906Mq/DPpfUyYHA4mDJA6SOEjiII2IY8jObZQJ12REHMwkDpI4SPcPT49bHwNDmRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQfoDKkd/7QPzORQAAAAASUVORK5CYII=" alt="" style="width:34px; height:34px; border-radius:8px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
             </a>
+            <span class="action-title" style="margin-bottom:0;">Einkaufsliste</span>
           </div>
           <span class="action-value" id="shoppingCount">0</span>
           <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card moss" id="pinnwandCard" style="cursor:pointer;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-            <span class="action-title" style="margin-bottom:0;">Pinnwand</span>
-            <a class="app-icon-link" href="https://diepinnwand.netlify.app" target="_blank" rel="noopener"
-               onclick="event.stopPropagation()" title="Pinnwand App öffnen">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" />
-              <span class="app-icon-badge">↗</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <a href="https://diepinnwand.netlify.app" target="_blank" rel="noopener"
+               onclick="event.stopPropagation()" title="Pinnwand App öffnen" style="flex-shrink:0; line-height:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" style="width:34px; height:34px; border-radius:8px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
             </a>
+            <span class="action-title" style="margin-bottom:0;">Pinnwand</span>
           </div>
           <span class="action-value" id="householdTasks">0</span>
           <div id="pinnwandPreview" class="shopping-preview"></div>
