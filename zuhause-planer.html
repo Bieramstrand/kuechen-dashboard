@@ -497,7 +497,9 @@
     async get(key, shared) {
       const snap = await db.collection(COLLECTION).doc(key).get();
       if (!snap.exists) return null;
-      return { key, value: snap.data().value, shared: !!shared };
+      let value = snap.data().value;
+      if (value !== null && typeof value !== 'string') { value = JSON.stringify(value); }
+      return { key, value, shared: !!shared };
     },
     async set(key, value, shared) {
       await db.collection(COLLECTION).doc(key).set({ value, updatedAt: Date.now() });
