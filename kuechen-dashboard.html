@@ -658,6 +658,16 @@
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
+
+  // Zeigt "HH:MM Titel" bei Terminen mit echter Uhrzeit, sonst nur den Titel
+  // (ganztägige ICS-Termine ohne Uhrzeit landen technisch auf 00:00 Uhr - das ist keine echte Zeit)
+  function formatEventText(ev) {
+    const h = ev.date.getHours();
+    const m = ev.date.getMinutes();
+    if (h === 0 && m === 0) return ev.title;
+    const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    return `${time} ${ev.title}`;
+  }
   
   // Aktuelle Temperatur für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
   async function loadTemperature() {
@@ -1116,7 +1126,7 @@
         dayEvents.forEach((ev) => {
           const evEl = document.createElement('div');
           evEl.className = `calendar-event ${ev.category}`;
-          evEl.textContent = ev.title;
+          evEl.textContent = formatEventText(ev);
           eventsDiv.appendChild(evEl);
         });
       }
@@ -1164,7 +1174,7 @@
         group.items.forEach((ev) => {
           const evEl = document.createElement('div');
           evEl.className = `calendar-event ${ev.category}`;
-          evEl.textContent = ev.title;
+          evEl.textContent = formatEventText(ev);
           eventsDiv.appendChild(evEl);
         });
       });
