@@ -367,33 +367,6 @@
     }
 
 
-    .app-launch-card {
-      background: #F1ECDD;
-      border-radius: 8px;
-      padding: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-    .app-launch-card img {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      flex-shrink: 0;
-      box-shadow: 0 1px 3px rgba(42,36,23,0.25);
-    }
-    .app-launch-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #2E2A22;
-    }
-    .app-launch-sub {
-      font-size: 0.72rem;
-      color: #8A8069;
-      margin-top: 2px;
-    }
-
     .last-update {
       font-size: 0.7rem;
       color: #C9BF9F;
@@ -540,24 +513,24 @@
       <h2 class="panel-title">Übersicht diese Woche</h2>
       <div class="actions-grid">
         <div class="action-card ocean" id="shoppingCard" style="cursor:pointer;">
-          <div style="display:flex; align-items:center; gap:10px;">
+          <span class="action-title" style="display:flex; align-items:center; gap:6px;">
             <a href="https://homedashboardeinkaufszettel.netlify.app" target="_blank" rel="noopener"
-               onclick="event.stopPropagation()" title="Einkaufszettel App öffnen" style="flex-shrink:0; line-height:0;">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC80lEQVR4nO3du3FTURRAUZuhBic4wi2QUAM9UBw9UAMJNZDRBwkR1haybOkdvbtW6JFm3mfr6F5rNLp/eHq8g0PebX0AzCUOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0vutD2CEXz9/PP/jx0+fr38ko9yv/F3Zg008t2wl676tnFjGix65MytOjrNv9mojZLnJ8ZoxsNoIWSuO19/dpfpYKI63uq/r9GEr+9c/64l1CjhilQXpkZt9ZJl53rN2Y4m3lbPv8Xnd7MYScZRTXv0rTIiy/zjqJX76Xa9H7n547D+Og146D9acHzuP49Iv7n0Pj53HcdB5Y2DB4bFiHJxIHKQ9x3GdBcGOlx17juOg1ywdVlt2LBcHpxMHSRwkcZBW+cieM5gcJHGQxEESB0kcJHGQbuOrCbv8cGv+JzUmB0kcJHGQbiCOXS447m7hvG4gDrYiDpI4SOIgiYN0G/8hvZzf378ef8CHL9+ucyQDTZ8c8/d7rzH87KbHwYbEQRIHSRwkcZBGxzF8Mf8mJp/j6DjYljhI4iCJgyQOkjhIc+OYvMd7W2PPdG4cbE4cJHGQxEESB0kcpKFxjN3dXcjM8x0aBxOIgyQOkjhI4iCJgzQxjpn7uksbeNYT42AIcZDEQRIHSRykcXEMXLRfzbRzHxcHc4iDJA6SOEjiIImDNCuOaXu56xt1BWbFwSjiIImDJA6SOEjiIA2KY9QubkNzrsOgOJhGHCRxkMRBEgdpShxzlugTDLkaq/906Mq/DPpfUyYHA4mDJA6SOEjiII2IY8jObZQJ12REHMwkDpI4SPcPT49bHwNDmRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQfoDKkd/7QPzORQAAAAASUVORK5CYII=" alt="" style="width:34px; height:34px; border-radius:8px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
+               onclick="event.stopPropagation()" title="Einkaufszettel App öffnen" style="line-height:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC80lEQVR4nO3du3FTURRAUZuhBic4wi2QUAM9UBw9UAMJNZDRBwkR1haybOkdvbtW6JFm3mfr6F5rNLp/eHq8g0PebX0AzCUOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0vutD2CEXz9/PP/jx0+fr38ko9yv/F3Zg008t2wl676tnFjGix65MytOjrNv9mojZLnJ8ZoxsNoIWSuO19/dpfpYKI63uq/r9GEr+9c/64l1CjhilQXpkZt9ZJl53rN2Y4m3lbPv8Xnd7MYScZRTXv0rTIiy/zjqJX76Xa9H7n547D+Og146D9acHzuP49Iv7n0Pj53HcdB5Y2DB4bFiHJxIHKQ9x3GdBcGOlx17juOg1ywdVlt2LBcHpxMHSRwkcZBW+cieM5gcJHGQxEESB0kcJHGQbuOrCbv8cGv+JzUmB0kcJHGQbiCOXS447m7hvG4gDrYiDpI4SOIgiYN0G/8hvZzf378ef8CHL9+ucyQDTZ8c8/d7rzH87KbHwYbEQRIHSRwkcZBGxzF8Mf8mJp/j6DjYljhI4iCJgyQOkjhIc+OYvMd7W2PPdG4cbE4cJHGQxEESB0kcpKFxjN3dXcjM8x0aBxOIgyQOkjhI4iCJgzQxjpn7uksbeNYT42AIcZDEQRIHSRykcXEMXLRfzbRzHxcHc4iDJA6SOEjiIImDNCuOaXu56xt1BWbFwSjiIImDJA6SOEjiIA2KY9QubkNzrsOgOJhGHCRxkMRBEgdpShxzlugTDLkaq/906Mq/DPpfUyYHA4mDJA6SOEjiII2IY8jObZQJ12REHMwkDpI4SPcPT49bHwNDmRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQfoDKkd/7QPzORQAAAAASUVORK5CYII=" alt="" style="width:20px; height:20px; border-radius:5px;" />
             </a>
-            <span class="action-title" style="margin-bottom:0;">Einkaufsliste</span>
-          </div>
+            Einkaufsliste
+          </span>
           <span class="action-value" id="shoppingCount">0</span>
           <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card moss" id="pinnwandCard" style="cursor:pointer;">
-          <div style="display:flex; align-items:center; gap:10px;">
+          <span class="action-title" style="display:flex; align-items:center; gap:6px;">
             <a href="https://diepinnwand.netlify.app" target="_blank" rel="noopener"
-               onclick="event.stopPropagation()" title="Pinnwand App öffnen" style="flex-shrink:0; line-height:0;">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" style="width:34px; height:34px; border-radius:8px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
+               onclick="event.stopPropagation()" title="Pinnwand App öffnen" style="line-height:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" style="width:20px; height:20px; border-radius:5px;" />
             </a>
-            <span class="action-title" style="margin-bottom:0;">Pinnwand</span>
-          </div>
+            Pinnwand
+          </span>
           <span class="action-value" id="householdTasks">0</span>
           <div id="pinnwandPreview" class="shopping-preview"></div>
         </div>
@@ -565,20 +538,16 @@
           <span class="action-title">Was essen wir heute</span>
           <span class="action-value" id="todaysMeal">—</span>
         </div>
-        <a class="app-launch-card" href="https://bieramstrand.de" target="_blank" rel="noopener">
-          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADg0lEQVR4nO3d0U0bQRSG0SFKD0goFaQNeqKI9JQ2qCcPSxwC/s0a2+ydvecoT1GQdj0fd+zBJnc/Hu4HHPNt6wugLnEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iL5vfQHn+f3r59aXcKnHp+etL2Gtu1l+Se0OsnhtikTm2FZ2VsaY5I4miGOKx/ET6t9X9TjqP4KXKH53peMo/thdReV7LB0H26obR+Vvqesqe6d142Bz4iCa7IT0dt6cSpUd9V9JHMcPK5e/bJ5I923l9DH2FIfct9M6jjVr37mPvnGsX/W2ffSNgw81jePcYdBzeDSNgzXEQSQOInEQNY3j3KPPnkelTeNgjb5xrB8GPcfG6BzHWLfqbcsYzeMYH6195zKGH9mPvwV4P8d74nihhve6byucIA4icRCJg0gcROIg2slL2YLv1NrBa+Pp4yiYxWIHn3yxrRDNHUfZsXFQ/wpPmDsObkocROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkjv9M/d6cqxMHkTj+WcaG4XEgDiJxvHg9MAyPhTiIxDGGURGI4zi5DHEMHWTiiETTPQ4FnDD9Z2VPu3DtP/zyqT/Q9qGdT46bLt6+yxi7nxzjNp92330Wi51PjoMrLmeTMkafOMaVFrVPGaNVHOPipW1VxujwnOONzz0F6ZbFotfkODhrsXuWMdrGwRpN4zhrW2l7ito0DtYQB5E4iDrGkZ5DPD49L3/Wf8m+tTvnOOpNEDv45cNX0XFyvJZGxWh8vHHQLo7DPDiRxcHrf9NwkHTcVs4dCW13mXaT49ObRcNdpl0crCcOornjqP88oP4VnjB3HNzU9K9Wjv5P9BVMPTMW08ex2MFKFGRbIRIHkTiIxEEkDiJxENWNo+DRxY2UvdO6cbC50nGU/Za6osr3WDqOUfuxu1zxu6sexyj/CH5a/fuaII4xw+N4rinu6O7Hw/3W13CGHfyAbYosFpPFwVeaY1thE+IgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDqI//vWynqQN/mgAAAAASUVORK5CYII=" alt="" />
-          <div>
-            <div class="app-launch-title">Backstage</div>
-            <div class="app-launch-sub">Freunde-Hub öffnen ↗</div>
-          </div>
-        </a>
-        <a class="app-launch-card" href="https://gasflasche.netlify.app/" target="_blank" rel="noopener">
-          <img src="data:image/png;base64,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" alt="" />
-          <div>
-            <div class="app-launch-title">Füllstand</div>
-            <div class="app-launch-sub">Gasstand prüfen ↗</div>
-          </div>
-        </a>
+        <div class="action-card" style="background:#F1ECDD; flex-direction:row; align-items:center; justify-content:center; gap:24px;">
+          <a href="https://bieramstrand.de" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADg0lEQVR4nO3d0U0bQRSG0SFKD0goFaQNeqKI9JQ2qCcPSxwC/s0a2+ydvecoT1GQdj0fd+zBJnc/Hu4HHPNt6wugLnEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iL5vfQHn+f3r59aXcKnHp+etL2Gtu1l+Se0OsnhtikTm2FZ2VsaY5I4miGOKx/ET6t9X9TjqP4KXKH53peMo/thdReV7LB0H26obR+Vvqesqe6d142Bz4iCa7IT0dt6cSpUd9V9JHMcPK5e/bJ5I923l9DH2FIfct9M6jjVr37mPvnGsX/W2ffSNgw81jePcYdBzeDSNgzXEQSQOInEQNY3j3KPPnkelTeNgjb5xrB8GPcfG6BzHWLfqbcsYzeMYH6195zKGH9mPvwV4P8d74nihhve6byucIA4icRCJg0gcROIg2slL2YLv1NrBa+Pp4yiYxWIHn3yxrRDNHUfZsXFQ/wpPmDsObkocROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkjv9M/d6cqxMHkTj+WcaG4XEgDiJxvHg9MAyPhTiIxDGGURGI4zi5DHEMHWTiiETTPQ4FnDD9Z2VPu3DtP/zyqT/Q9qGdT46bLt6+yxi7nxzjNp92330Wi51PjoMrLmeTMkafOMaVFrVPGaNVHOPipW1VxujwnOONzz0F6ZbFotfkODhrsXuWMdrGwRpN4zhrW2l7ito0DtYQB5E4iDrGkZ5DPD49L3/Wf8m+tTvnOOpNEDv45cNX0XFyvJZGxWh8vHHQLo7DPDiRxcHrf9NwkHTcVs4dCW13mXaT49ObRcNdpl0crCcOornjqP88oP4VnjB3HNzU9K9Wjv5P9BVMPTMW08ex2MFKFGRbIRIHkTiIxEEkDiJxENWNo+DRxY2UvdO6cbC50nGU/Za6osr3WDqOUfuxu1zxu6sexyj/CH5a/fuaII4xw+N4rinu6O7Hw/3W13CGHfyAbYosFpPFwVeaY1thE+IgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDqI//vWynqQN/mgAAAAASUVORK5CYII=" alt="" style="width:40px; height:40px; border-radius:9px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
+            <span style="font-size:0.78rem; font-weight:600; color:#2E2A22;">Backstage</span>
+          </a>
+          <a href="https://gasflasche.netlify.app/" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
+            <img src="data:image/png;base64,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" alt="" style="width:40px; height:40px; border-radius:9px; box-shadow:0 1px 3px rgba(42,36,23,0.25);" />
+            <span style="font-size:0.78rem; font-weight:600; color:#2E2A22;">Füllstand</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>
