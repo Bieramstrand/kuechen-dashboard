@@ -1038,7 +1038,8 @@
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    // Woche beginnt mit Montag: JS getDay() liefert 0=So..6=Sa, hier auf 0=Mo..6=So umrechnen
+    const startingDayOfWeek = (firstDay.getDay() + 6) % 7;
     
     const events = await loadCalendarEvents();
     const eventsByDate = {};
@@ -1051,7 +1052,7 @@
     const grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
     
-    const daysOfWeek = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    const daysOfWeek = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     daysOfWeek.forEach(day => {
       const dow = document.createElement('div');
       dow.className = 'calendar-dow';
@@ -1247,12 +1248,19 @@
   // Aktions-Übersicht aktualisieren
   async function updateActionsOverview() {
     try {
-      // Einkaufsliste (nur Artikel, die über das Dashboard hinzugefügt wurden)
-      const shopping = await window.storage.get('shoppingapp:items', true);
+      // Einkaufsliste (nur Artikel aus der Liste "Einkaufsliste", nicht aus anderen Listen wie Rewe/Edeka)
       const previewEl = document.getElementById('shoppingPreview');
-      if (shopping) {
-        const shopData = JSON.parse(shopping.value);
-        const open = shopData.filter((i) => !i.checked && i.addedVia === 'dashboard');
+      try {
+        const listsRes = await window.storage.get('shoppingapp:lists', true);
+        const lists = listsRes && listsRes.value ? JSON.parse(listsRes.value) : [];
+        const einkaufsliste = lists.find((l) => l.name === 'Einkaufsliste');
+
+        const itemsRes = await window.storage.get('shoppingapp:items', true);
+        const shopData = itemsRes && itemsRes.value ? JSON.parse(itemsRes.value) : [];
+
+        const open = einkaufsliste
+          ? shopData.filter((i) => !i.checked && i.listId === einkaufsliste.id)
+          : [];
         document.getElementById('shoppingCount').textContent = open.length;
 
         const preview = open.slice(-5).reverse(); // zuletzt hinzugefügte zuerst
@@ -1264,7 +1272,7 @@
             preview.map((i) => `• ${escapeHtml(i.n)}`).join('<br>') +
             (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
         }
-      } else {
+      } catch (e) {
         document.getElementById('shoppingCount').textContent = '0';
         previewEl.innerHTML = '';
       }
@@ -1348,24 +1356,26 @@
       if (itemInput !== null && itemInput.trim()) {
         const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
 
-        // Gleiche Listen-Struktur wie im Einkaufszettel: erste/Standard-Liste verwenden, notfalls anlegen
+        // Gleiche Listen-Struktur wie im Einkaufszettel: Liste "Einkaufsliste" gezielt verwenden, notfalls anlegen
         let lists = [];
         try {
           const existingLists = await window.storage.get('shoppingapp:lists', true);
           if (existingLists) lists = JSON.parse(existingLists.value);
         } catch (e) {}
 
-        if (lists.length === 0) {
-          lists.push({
+        let einkaufsliste = lists.find((l) => l.name === 'Einkaufsliste');
+        if (!einkaufsliste) {
+          einkaufsliste = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
             name: 'Einkaufsliste',
             icon: '🛍️',
             color: '#3C6E8F',
             createdAt: Date.now(),
-          });
+          };
+          lists.push(einkaufsliste);
           await window.storage.set('shoppingapp:lists', JSON.stringify(lists), true);
         }
-        const targetListId = lists[0].id;
+        const targetListId = einkaufsliste.id;
 
         let items = [];
         try {
