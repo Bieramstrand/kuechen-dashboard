@@ -334,7 +334,7 @@
       padding: 14px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
     }
     .action-title {
       font-weight: 600;
@@ -348,6 +348,7 @@
       color: #3C6E8F;
       cursor: pointer;
       user-select: none;
+      margin-top: 2px;
     }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
@@ -511,12 +512,30 @@
       <h2 class="panel-title">Übersicht diese Woche</h2>
       <div class="actions-grid">
         <div class="action-card ocean" id="shoppingCard" style="cursor:pointer;">
-          <span class="action-title">Einkaufsliste</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+            <span class="action-title" style="display:flex; align-items:center; gap:6px; margin-bottom:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC80lEQVR4nO3du3FTURRAUZuhBic4wi2QUAM9UBw9UAMJNZDRBwkR1haybOkdvbtW6JFm3mfr6F5rNLp/eHq8g0PebX0AzCUOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0vutD2CEXz9/PP/jx0+fr38ko9yv/F3Zg008t2wl676tnFjGix65MytOjrNv9mojZLnJ8ZoxsNoIWSuO19/dpfpYKI63uq/r9GEr+9c/64l1CjhilQXpkZt9ZJl53rN2Y4m3lbPv8Xnd7MYScZRTXv0rTIiy/zjqJX76Xa9H7n547D+Og146D9acHzuP49Iv7n0Pj53HcdB5Y2DB4bFiHJxIHKQ9x3GdBcGOlx17juOg1ywdVlt2LBcHpxMHSRwkcZBW+cieM5gcJHGQxEESB0kcJHGQbuOrCbv8cGv+JzUmB0kcJHGQbiCOXS447m7hvG4gDrYiDpI4SOIgiYN0G/8hvZzf378ef8CHL9+ucyQDTZ8c8/d7rzH87KbHwYbEQRIHSRwkcZBGxzF8Mf8mJp/j6DjYljhI4iCJgyQOkjhIc+OYvMd7W2PPdG4cbE4cJHGQxEESB0kcpKFxjN3dXcjM8x0aBxOIgyQOkjhI4iCJgzQxjpn7uksbeNYT42AIcZDEQRIHSRykcXEMXLRfzbRzHxcHc4iDJA6SOEjiIImDNCuOaXu56xt1BWbFwSjiIImDJA6SOEjiIA2KY9QubkNzrsOgOJhGHCRxkMRBEgdpShxzlugTDLkaq/906Mq/DPpfUyYHA4mDJA6SOEjiII2IY8jObZQJ12REHMwkDpI4SPcPT49bHwNDmRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQfoDKkd/7QPzORQAAAAASUVORK5CYII=" alt="" style="width:20px; height:20px; border-radius:5px; flex-shrink:0;" />
+              Einkaufsliste
+            </span>
+            <a href="https://homedashboardeinkaufszettel.netlify.app" target="_blank" rel="noopener"
+               onclick="event.stopPropagation()"
+               style="font-size:0.7rem; color:#3C6E8F; text-decoration:none; white-space:nowrap; flex-shrink:0;"
+               title="Einkaufszettel App öffnen">App öffnen ↗</a>
+          </div>
           <span class="action-value" id="shoppingCount">0</span>
           <div id="shoppingPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card moss" id="pinnwandCard" style="cursor:pointer;">
-          <span class="action-title">Pinnwand</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+            <span class="action-title" style="display:flex; align-items:center; gap:6px; margin-bottom:0;">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" style="width:20px; height:20px; border-radius:5px; flex-shrink:0;" />
+              Pinnwand
+            </span>
+            <a href="https://diepinnwand.netlify.app" target="_blank" rel="noopener"
+               onclick="event.stopPropagation()"
+               style="font-size:0.7rem; color:#4F6B44; text-decoration:none; white-space:nowrap; flex-shrink:0;"
+               title="Pinnwand App öffnen">App öffnen ↗</a>
+          </div>
           <span class="action-value" id="householdTasks">0</span>
           <div id="pinnwandPreview" class="shopping-preview"></div>
         </div>
