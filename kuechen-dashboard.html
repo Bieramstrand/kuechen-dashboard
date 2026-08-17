@@ -453,6 +453,7 @@
       <div class="radar-controls" id="hvvDirectionControls">
         <button class="time-btn active" data-direction="innenstadt">🏙️ Innenstadt / Hbf</button>
         <button class="time-btn" data-direction="norderstedt">🏠 Norderstedt Mitte</button>
+        <button class="time-btn" data-direction="poppenbuettel">🚉 Poppenbüttel</button>
       </div>
       <div class="hvv-list" id="hvvList">
         <div class="hvv-loading">Wird geladen…</div>
@@ -629,7 +630,7 @@
   // Aktuelle Temperatur für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
   async function loadTemperature() {
     try {
-      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.7&longitude=9.98&current=temperature_2m&timezone=Europe%2FBerlin');
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.683943&longitude=9.979259&current=temperature_2m&timezone=Europe%2FBerlin');
       const data = await res.json();
       const temp = data.current && data.current.temperature_2m;
       if (temp != null) {
@@ -642,7 +643,7 @@
 
   // RainViewer Karte initialisieren
   function initRainViewer() {
-    const HOME_VIEW = { center: [53.633, 10.000], zoom: 11 };
+    const HOME_VIEW = { center: [53.683943, 9.979259], zoom: 13 }; // Achternfelde 22D, Norderstedt
     const map = L.map('rainviewer-map').setView(HOME_VIEW.center, HOME_VIEW.zoom);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1232,11 +1233,70 @@
     `).join('');
   }
 
+  // Versucht, verschiedene moegliche GTI-Zeitformate zu erkennen (String/ISO/Objekt)
+  function parseGtiTime(raw) {
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+      const d = new Date(raw);
+      if (!isNaN(d)) return d;
+    }
+    if (typeof raw === 'object' && raw.date && raw.time) {
+      // z.B. { date: "16.08.2026", time: "14:30" }
+      const [day, month, year] = String(raw.date).split('.');
+      const [h, m] = String(raw.time).split(':');
+      if (day && month && year && h && m) {
+        return new Date(+year, +month - 1, +day, +h, +m);
+      }
+    }
+    return null;
+  }
+
+  async function loadPoppenbuettelRoute() {
+    const listEl = document.getElementById('hvvList');
+    listEl.innerHTML = '<div class="hvv-loading">Wird geladen…</div>';
+    try {
+      const response = await fetch('/.netlify/functions/hvv-route');
+      const data = await response.json();
+
+      if (!data.success || !data.connections || data.connections.length === 0) {
+        listEl.innerHTML = `<div class="hvv-error">Keine Verbindung gefunden${data.error ? ': ' + data.error : ''}</div>`;
+        return;
+      }
+
+      listEl.innerHTML = data.connections.map((c) => {
+        const dep = parseGtiTime(c.departureRaw);
+        const arr = parseGtiTime(c.arrivalRaw);
+        const depStr = dep ? dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : (c.departureRaw || '?');
+        const arrStr = arr ? arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : (c.arrivalRaw || '?');
+        const lineStr = c.lines && c.lines.length > 0 ? c.lines.join(' → ') : '';
+        return `
+          <div class="hvv-item">
+            <div class="hvv-line">${lineStr || 'Verbindung'}</div>
+            <div class="hvv-destination">Poppenbüttel${c.changes > 0 ? ` · ${c.changes}x umsteigen` : ''}</div>
+            <div class="hvv-time">ab ${depStr} → an ${arrStr}</div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {
+      console.error('Poppenbüttel Route Fehler:', e);
+      listEl.innerHTML = '<div class="hvv-error">Route nicht erreichbar</div>';
+    }
+    const now = new Date();
+    document.getElementById('hvvUpdate').textContent = `Aktualisiert: ${now.toLocaleTimeString('de-DE')}`;
+  }
+
   document.querySelectorAll('#hvvDirectionControls .time-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('#hvvDirectionControls .time-btn').forEach((b) => b.classList.remove('active'));
       e.currentTarget.classList.add('active');
       hvvDirection = e.currentTarget.dataset.direction;
+
+      if (hvvDirection === 'poppenbuettel') {
+        document.getElementById('hvvSubtitle').textContent = 'Nach Poppenbüttel (mit Umstieg) – nächste Verbindungen';
+        loadPoppenbuettelRoute();
+        return;
+      }
+
       document.getElementById('hvvSubtitle').textContent =
         hvvDirection === 'innenstadt'
           ? 'Richtung Innenstadt – Nächste Abfahrten'
