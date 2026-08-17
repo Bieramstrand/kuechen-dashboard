@@ -508,7 +508,6 @@
       <p class="panel-subtitle" id="hvvSubtitle">Richtung Innenstadt – Nächste Abfahrten</p>
       <div class="radar-controls" id="hvvDirectionControls">
         <button class="time-btn active" data-direction="innenstadt">🏙️ Innenstadt / Hbf</button>
-        <button class="time-btn" data-direction="norderstedt">🏠 Norderstedt Mitte</button>
         <button class="time-btn" data-direction="poppenbuettel">🚉 Poppenbüttel</button>
       </div>
       <div class="hvv-list" id="hvvList">
@@ -712,9 +711,8 @@
     });
 
     let rainLayer = null;
-    let frames = []; // RainViewer-Frames (Fallback), { time, path }
+    let frames = []; // RainViewer-Frames, { time, path }
     let tileHost = 'https://tilecache.rainviewer.com';
-    let dwdFailed = false;
     let playing = false;
     let playTimer = null;
     let playCount = 0;
@@ -723,14 +721,8 @@
     const slider = document.getElementById('radarSlider');
     const badge = document.getElementById('radarTimeBadge');
 
-    // DWD WMS Radar - Versuch mit "FX-Produkt" (kombiniertes Radar+Prognose-Produkt, 2h Vorhersage)
-    const DWD_WMS_URL = 'https://maps.dwd.de/geoserver/dwd/wms';
-    // Bestaetigt durch offizielle Doku von weather-radar-card (Home Assistant Karte, 434 Stars)
-    // + unabhaengig bestaetigt im Locus-Map-Forum: Basis-Layer "Niederschlagsradar",
-    // fuer Vorhersage/Nowcast (+2h) "Radar_wn-product_1x1km_ger"
-    const DWD_LAYER = 'dwd:Radar_wn-product_1x1km_ger';
-
-    // Zeitstrahl: 1 Stunde Vergangenheit (12x5min) + 2 Stunden Zukunft (24x5min)
+    // Zeitstrahl: 2 Stunden Vergangenheit (24x5min) + 2 Stunden Zukunft-Platzhalter (24x5min)
+    // RainViewer (kostenlos) liefert keine echte Vorhersage, siehe showStep()
     let timeSteps = [];
     let nowStepIndex = 0;
 
@@ -749,47 +741,15 @@
       return steps;
     }
 
-    function isoTime(d) {
-      return d.toISOString().split('.')[0] + 'Z';
-    }
-
     function showStep(index) {
       const step = timeSteps[index];
       if (!step) return;
       slider.value = index;
-
-      if (rainLayer) map.removeLayer(rainLayer);
-
-      if (!dwdFailed) {
-        rainLayer = L.tileLayer.wms(DWD_WMS_URL, {
-          layers: DWD_LAYER,
-          format: 'image/png',
-          transparent: true,
-          version: '1.3.0',
-          opacity: 0.7,
-          time: isoTime(step.time),
-        });
-        rainLayer.on('tileerror', () => {
-          console.error('DWD FX-Produkt Fehler, wechsle dauerhaft zu RainViewer (nur Vergangenheit verfuegbar)');
-          dwdFailed = true;
-          if (frames.length > 0) showStepFallback(index);
-          else loadRainViewerData(() => showStepFallback(index));
-        });
-        rainLayer.addTo(map);
-        updateTimeUI(step, '(DWD)');
-      } else {
-        showStepFallback(index);
-      }
-    }
-
-    function showStepFallback(index) {
-      const step = timeSteps[index];
-      slider.value = index;
       if (rainLayer) map.removeLayer(rainLayer);
 
       if (step.type === 'future' || frames.length === 0) {
-        // RainViewer (kostenlos) hat keine echte Vorhersage - dann letztes bekanntes Bild zeigen
-        updateTimeUI(step, '(keine Vorhersage verfügbar, letzter Stand)');
+        // Keine echte Vorhersage verfuegbar - letztes bekanntes Bild zeigen, ehrlich gekennzeichnet
+        updateTimeUI(step, frames.length > 0 ? '(keine Vorhersage verfügbar, letzter Stand)' : '(lädt…)');
         if (frames.length > 0) {
           const f = frames[frames.length - 1];
           const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
@@ -809,7 +769,7 @@
         const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
         rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
       }
-      updateTimeUI(step, '(RainViewer, Fallback)');
+      updateTimeUI(step, '(RainViewer)');
     }
 
     function updateTimeUI(step, sourceLabel) {
@@ -830,7 +790,6 @@
       timeSpan.textContent = timeStr + ' Uhr ' + sourceLabel;
     }
 
-    // ---- RainViewer Fallback-Daten ----
     function loadRainViewerData(callback) {
       fetch('https://api.rainviewer.com/public/weather-maps.json')
         .then(res => res.json())
@@ -839,7 +798,7 @@
           frames = (data.radar && data.radar.past) || [];
           if (callback) callback();
         })
-        .catch(e => console.error('RainViewer Fallback fehlgeschlagen:', e));
+        .catch(e => console.error('RainViewer Ladefehler:', e));
     }
 
     slider.addEventListener('input', (e) => {
@@ -877,16 +836,12 @@
     function init() {
       timeSteps = generateTimeSteps();
       slider.max = timeSteps.length - 1;
-      nowStepIndex = 24; // Uebergang Vergangenheit/Zukunft (24 x 5min = 2h Vergangenheit)
-      loadRainViewerData();
-      showStep(nowStepIndex);
+      nowStepIndex = 24; // Uebergang Vergangenheit/Zukunft
+      loadRainViewerData(() => showStep(nowStepIndex));
     }
 
     init();
-    setInterval(() => {
-      loadRainViewerData();
-      init();
-    }, 5 * 60 * 1000);
+    setInterval(init, 5 * 60 * 1000);
   }
 
   // Kalender aus Speicher laden (Trips + ICS Uploads)
@@ -1405,10 +1360,7 @@
         return;
       }
 
-      document.getElementById('hvvSubtitle').textContent =
-        hvvDirection === 'innenstadt'
-          ? 'Richtung Innenstadt – Nächste Abfahrten'
-          : 'Richtung Norderstedt Mitte – Nächste Abfahrten';
+      document.getElementById('hvvSubtitle').textContent = 'Richtung Innenstadt – Nächste Abfahrten';
       renderHVVList();
     });
   });
