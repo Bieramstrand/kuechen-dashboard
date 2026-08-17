@@ -205,12 +205,69 @@
       gap: 12px;
       margin-bottom: 6px;
     }
+    .radar-play-btn {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #3C6E8F;
+      color: #FBF8F1;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-play-btn:active { background: #2E5A75; }
+    .radar-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #E4DCC5;
+      outline: none;
+    }
+    .radar-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D9A441;
+      border: 3px solid #FBF8F1;
+      box-shadow: 0 1px 4px rgba(42,36,23,0.3);
+      cursor: pointer;
+    }
+    .radar-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D9A441;
+      border: 3px solid #FBF8F1;
+      cursor: pointer;
+    }
     .current-time {
       font-size: 0.8rem;
       color: #8A8069;
       text-align: center;
       margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
+    .radar-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+      letter-spacing: 0.03em;
+    }
+    .radar-badge.badge-past { background: #8A8069; color: #FBF8F1; }
+    .radar-badge.badge-future { background: #D9A441; color: #2E2A22; }
 
     /* HVV Panel */
     #hvvPanel {
@@ -432,14 +489,13 @@
         <span id="currentTemp" style="font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem; color:#C4883A;"></span>
       </div>
       <p class="panel-subtitle">Norderstedt – Regenradar</p>
-      <div class="radar-controls" id="timelineControls">
-        <button id="radarPlayBtn" class="time-btn" aria-label="Abspielen" style="flex-shrink:0;">▶</button>
-        <button class="time-btn active" data-offset="0">Jetzt</button>
-        <button class="time-btn" data-offset="-30">-30 Min</button>
-        <button class="time-btn" data-offset="-60">-1 Std</button>
-        <button class="time-btn" data-offset="-120">-2 Std</button>
+      <div class="radar-timeline">
+        <button id="radarPlayBtn" class="radar-play-btn" aria-label="Abspielen">▶</button>
+        <input type="range" id="radarSlider" class="radar-slider" min="0" max="0" value="0" step="1" />
       </div>
-      <div class="current-time" id="currentTimeDisplay"></div>
+      <div class="current-time" id="currentTimeDisplay">
+        <span id="radarTimeBadge" class="radar-badge badge-past">Echtzeit</span>
+      </div>
       <div class="radar-container">
         <div id="rainviewer-map" style="width: 100%; height: 100%;"></div>
         <button id="radarRecenterBtn" class="radar-recenter-btn" aria-label="Zurück zu Norderstedt" title="Zurück zu Norderstedt">📍</button>
@@ -656,116 +712,158 @@
     });
 
     let rainLayer = null;
-    let frames = []; // { time, path }
+    let frames = []; // RainViewer-Frames (Fallback), { time, path }
     let tileHost = 'https://tilecache.rainviewer.com';
-    let currentIndex = 0;
-    let nowIndex = 0;
+    let dwdFailed = false;
     let playing = false;
     let playTimer = null;
-    let playSteps = 0;
+    let playCount = 0;
 
     const playBtn = document.getElementById('radarPlayBtn');
+    const slider = document.getElementById('radarSlider');
+    const badge = document.getElementById('radarTimeBadge');
 
-    // DWD WMS Radar - bestaetigt funktionierender Layer: aktuelles Radarbild (kein Zeitparameter/keine Vorhersage)
+    // DWD WMS Radar - Versuch mit "FX-Produkt" (kombiniertes Radar+Prognose-Produkt, 2h Vorhersage)
     const DWD_WMS_URL = 'https://maps.dwd.de/geoserver/dwd/wms';
-    const DWD_LAYER = 'dwd:RX-Produkt';
-    let dwdFailed = false;
-    let currentOffset = 0;
+    // Bestaetigt durch offizielle Doku von weather-radar-card (Home Assistant Karte, 434 Stars)
+    // + unabhaengig bestaetigt im Locus-Map-Forum: Basis-Layer "Niederschlagsradar",
+    // fuer Vorhersage/Nowcast (+2h) "Radar_wn-product_1x1km_ger"
+    const DWD_LAYER = 'dwd:Radar_wn-product_1x1km_ger';
 
-    function showLayer(offsetMinutes) {
-      currentOffset = offsetMinutes;
+    // Zeitstrahl: 1 Stunde Vergangenheit (12x5min) + 2 Stunden Zukunft (24x5min)
+    let timeSteps = [];
+    let nowStepIndex = 0;
+
+    function generateTimeSteps() {
+      const steps = [];
+      const now = new Date();
+      now.setSeconds(0, 0);
+      now.setMinutes(Math.floor(now.getMinutes() / 5) * 5);
+
+      for (let i = -24; i <= 0; i++) {
+        steps.push({ time: new Date(now.getTime() + i * 5 * 60000), type: 'past' });
+      }
+      for (let i = 1; i <= 24; i++) {
+        steps.push({ time: new Date(now.getTime() + i * 5 * 60000), type: 'future' });
+      }
+      return steps;
+    }
+
+    function isoTime(d) {
+      return d.toISOString().split('.')[0] + 'Z';
+    }
+
+    function showStep(index) {
+      const step = timeSteps[index];
+      if (!step) return;
+      slider.value = index;
+
       if (rainLayer) map.removeLayer(rainLayer);
 
-      // "Jetzt" versucht zuerst DWD (bessere Aufloesung), alles andere laeuft ueber RainViewer
-      // (RainViewer ist die einzige Quelle, die zuverlaessig Vergangenheits-Frames liefert)
-      if (offsetMinutes === 0 && !dwdFailed) {
+      if (!dwdFailed) {
         rainLayer = L.tileLayer.wms(DWD_WMS_URL, {
           layers: DWD_LAYER,
           format: 'image/png',
           transparent: true,
           version: '1.3.0',
           opacity: 0.7,
+          time: isoTime(step.time),
         });
         rainLayer.on('tileerror', () => {
-          console.error('DWD WMS Fehler, wechsle dauerhaft zu RainViewer');
+          console.error('DWD FX-Produkt Fehler, wechsle dauerhaft zu RainViewer (nur Vergangenheit verfuegbar)');
           dwdFailed = true;
-          if (frames.length > 0) jumpToOffsetRainViewer(0);
-          else loadRainViewerData(() => jumpToOffsetRainViewer(0));
+          if (frames.length > 0) showStepFallback(index);
+          else loadRainViewerData(() => showStepFallback(index));
         });
         rainLayer.addTo(map);
-        const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('currentTimeDisplay').textContent = timeStr + ' Uhr (DWD)';
+        updateTimeUI(step, '(DWD)');
       } else {
-        jumpToOffsetRainViewer(offsetMinutes);
+        showStepFallback(index);
       }
     }
 
-    // ---- RainViewer Fallback (nur falls DWD-Layer fehlschlaegt) ----
-    function loadRainViewerData(callback) {
-      fetch('https://api.rainviewer.com/public/weather-maps.json')
-        .then(res => res.json())
-        .then(data => {
-          tileHost = data.host || tileHost;
-          const past = (data.radar && data.radar.past) || [];
-          frames = past;
-          if (frames.length > 0) nowIndex = frames.length - 1;
-          if (callback) callback();
-        })
-        .catch(e => console.error('RainViewer Fallback fehlgeschlagen:', e));
-    }
-    function updateRainLayerFallback(index) {
-      const frame = frames[index];
-      if (!frame) return;
-      currentIndex = index;
+    function showStepFallback(index) {
+      const step = timeSteps[index];
+      slider.value = index;
       if (rainLayer) map.removeLayer(rainLayer);
-      const url = `${tileHost}${frame.path}/512/{z}/{x}/{y}/2/1_1.png`;
-      rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
-      const displayTime = new Date(frame.time * 1000);
-      const timeStr = displayTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('currentTimeDisplay').textContent = timeStr + ' Uhr (RainViewer, Fallback)';
-    }
-    function jumpToOffsetRainViewer(offsetMinutes) {
-      if (frames.length === 0) return;
-      const targetTimestamp = Math.floor((Date.now() + offsetMinutes * 60000) / 1000);
+
+      if (step.type === 'future' || frames.length === 0) {
+        // RainViewer (kostenlos) hat keine echte Vorhersage - dann letztes bekanntes Bild zeigen
+        updateTimeUI(step, '(keine Vorhersage verfügbar, letzter Stand)');
+        if (frames.length > 0) {
+          const f = frames[frames.length - 1];
+          const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
+          rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
+        }
+        return;
+      }
+
+      const targetTimestamp = Math.floor(step.time.getTime() / 1000);
       let closestIdx = 0, closestDiff = Infinity;
       frames.forEach((f, i) => {
         const diff = Math.abs(f.time - targetTimestamp);
         if (diff < closestDiff) { closestDiff = diff; closestIdx = i; }
       });
-      updateRainLayerFallback(closestIdx);
+      const f = frames[closestIdx];
+      if (f) {
+        const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
+        rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
+      }
+      updateTimeUI(step, '(RainViewer, Fallback)');
     }
 
-    document.querySelectorAll('#timelineControls .time-btn[data-offset]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        stopPlaying();
-        document.querySelectorAll('#timelineControls .time-btn[data-offset]').forEach((b) => b.classList.remove('active'));
-        e.currentTarget.classList.add('active');
-        showLayer(parseInt(e.currentTarget.dataset.offset, 10));
-      });
+    function updateTimeUI(step, sourceLabel) {
+      const timeStr = step.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      if (step.type === 'future') {
+        badge.textContent = 'Prognose';
+        badge.className = 'radar-badge badge-future';
+      } else {
+        badge.textContent = 'Echtzeit';
+        badge.className = 'radar-badge badge-past';
+      }
+      let timeSpan = document.getElementById('radarTimeText');
+      if (!timeSpan) {
+        timeSpan = document.createElement('span');
+        timeSpan.id = 'radarTimeText';
+        document.getElementById('currentTimeDisplay').prepend(timeSpan);
+      }
+      timeSpan.textContent = timeStr + ' Uhr ' + sourceLabel;
+    }
+
+    // ---- RainViewer Fallback-Daten ----
+    function loadRainViewerData(callback) {
+      fetch('https://api.rainviewer.com/public/weather-maps.json')
+        .then(res => res.json())
+        .then(data => {
+          tileHost = data.host || tileHost;
+          frames = (data.radar && data.radar.past) || [];
+          if (callback) callback();
+        })
+        .catch(e => console.error('RainViewer Fallback fehlgeschlagen:', e));
+    }
+
+    slider.addEventListener('input', (e) => {
+      stopPlaying();
+      showStep(parseInt(e.target.value, 10));
     });
 
-    // Play: schrittweise durch die letzten 2 Stunden, 2x Durchlauf, dann Stop
-    const PLAY_STEPS = [-120, -90, -60, -30, -15, 0];
-    let playIndex = 0;
-
     function stepFrame() {
-      playSteps++;
-      if (playSteps >= PLAY_STEPS.length * 2) {
+      playCount++;
+      if (playCount >= timeSteps.length * 2) {
         stopPlaying();
-        showLayer(0);
+        showStep(nowStepIndex);
         return;
       }
-      playIndex = (playIndex + 1) % PLAY_STEPS.length;
-      showLayer(PLAY_STEPS[playIndex]);
+      let next = parseInt(slider.value, 10) + 1;
+      if (next > timeSteps.length - 1) next = 0;
+      showStep(next);
     }
 
     function startPlaying() {
       playing = true;
-      playSteps = 0;
-      playIndex = 0;
+      playCount = 0;
       playBtn.textContent = '⏸';
-      showLayer(PLAY_STEPS[0]);
-      playTimer = setInterval(stepFrame, 900);
+      playTimer = setInterval(stepFrame, 600);
     }
     function stopPlaying() {
       playing = false;
@@ -776,9 +874,19 @@
       if (playing) stopPlaying(); else startPlaying();
     });
 
-    loadRainViewerData(); // RainViewer-Frames im Hintergrund vorladen, fuer die Vergangenheits-Buttons
-    showLayer(0);
-    setInterval(() => { loadRainViewerData(); showLayer(currentOffset); }, 5 * 60 * 1000);
+    function init() {
+      timeSteps = generateTimeSteps();
+      slider.max = timeSteps.length - 1;
+      nowStepIndex = 24; // Uebergang Vergangenheit/Zukunft (24 x 5min = 2h Vergangenheit)
+      loadRainViewerData();
+      showStep(nowStepIndex);
+    }
+
+    init();
+    setInterval(() => {
+      loadRainViewerData();
+      init();
+    }, 5 * 60 * 1000);
   }
 
   // Kalender aus Speicher laden (Trips + ICS Uploads)
