@@ -86,7 +86,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'max-age=60',
+        'Cache-Control': 'no-store, max-age=0',
       },
       body: JSON.stringify({
         success: true,
