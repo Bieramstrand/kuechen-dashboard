@@ -1254,7 +1254,7 @@
   async function loadHVVData() {
     const listEl = document.getElementById('hvvList');
     try {
-      const response = await fetch('/.netlify/functions/hvv-departures');
+      const response = await fetch('/.netlify/functions/hvv-departures?_=' + Date.now(), { cache: 'no-store' });
       if (!response.ok) throw new Error('Function error');
       
       const data = await response.json();
@@ -1318,7 +1318,7 @@
     const listEl = document.getElementById('hvvList');
     listEl.innerHTML = '<div class="hvv-loading">Wird geladen…</div>';
     try {
-      const response = await fetch('/.netlify/functions/hvv-route');
+      const response = await fetch('/.netlify/functions/hvv-route?_=' + Date.now(), { cache: 'no-store' });
       const data = await response.json();
 
       if (!data.success || !data.connections || data.connections.length === 0) {
