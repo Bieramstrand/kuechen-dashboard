@@ -67,14 +67,16 @@ exports.handler = async (event, context) => {
     const schedules = grResponse.schedules || [];
 
     const connections = schedules.slice(0, 3).map((s) => {
-      const parts = s.parts || s.legs || [];
-      const lines = parts
-        .map((p) => (p.line && p.line.name) || null)
+      const elements = s.scheduleElements || [];
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      const lines = elements
+        .map((e) => (e.line && e.line.name) || null)
         .filter(Boolean);
 
       return {
-        departureRaw: s.plannedDepartureTime || s.departureTime || null,
-        arrivalRaw: s.plannedArrivalTime || s.arrivalTime || null,
+        departureRaw: first && first.from && first.from.depTime ? first.from.depTime : null,
+        arrivalRaw: last && last.to && last.to.arrTime ? last.to.arrTime : null,
         lines,
         changes: typeof s.changes === 'number' ? s.changes : Math.max(0, lines.length - 1),
       };
