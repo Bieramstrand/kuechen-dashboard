@@ -1215,50 +1215,26 @@
       return;
     }
 
-    const upcoming = events
-      .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
-      .sort((a, b) => a.date - b.date);
+    // Ohne Auswahl: nur den heutigen Tag zeigen (kein Ausblick auf kommende Tage mehr)
+    const todayKey = localDateKey(now);
+    const todayEvents = (eventsByDate[todayKey] || []).slice().sort((a, b) => a.date - b.date);
+    const label = now.toLocaleDateString('de-DE', {
+      weekday: 'long', day: '2-digit', month: '2-digit',
+    });
 
-    if (upcoming.length === 0) {
-      eventsDiv.innerHTML = '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine kommenden Termine</p>';
+    const heading = document.createElement('p');
+    heading.textContent = label;
+    heading.style.cssText = 'font-size:0.8rem;font-weight:600;margin:2px 0 6px;';
+    eventsDiv.appendChild(heading);
+
+    if (todayEvents.length === 0) {
+      eventsDiv.innerHTML += '<p style="font-size:0.75rem;color:#8A8069;margin:4px 0;">Keine Termine heute</p>';
     } else {
-      // In Tages-Gruppen aufteilen
-      const dayGroups = [];
-      upcoming.forEach((ev) => {
-        const key = localDateKey(ev.date);
-        let group = dayGroups.find((g) => g.key === key);
-        if (!group) {
-          group = { key, date: ev.date, items: [] };
-          dayGroups.push(group);
-        }
-        group.items.push(ev);
-      });
-
-      // Ganze Tage anzeigen, bis mindestens 7 Termine insgesamt sichtbar sind
-      // (ein Tag wird nie mittendrin abgeschnitten)
-      let total = 0;
-      let cutoff = dayGroups.length;
-      for (let i = 0; i < dayGroups.length; i++) {
-        total += dayGroups[i].items.length;
-        if (total >= 7) { cutoff = i + 1; break; }
-      }
-      const visibleGroups = dayGroups.slice(0, cutoff);
-
-      visibleGroups.forEach((group, i) => {
-        const heading = document.createElement('p');
-        heading.textContent = group.date.toLocaleDateString('de-DE', {
-          weekday: 'long', day: '2-digit', month: '2-digit',
-        });
-        heading.style.cssText = 'font-size:0.78rem;font-weight:600;color:#2E2A22;margin:10px 0 4px;';
-        if (i === 0) heading.style.marginTop = '0';
-        eventsDiv.appendChild(heading);
-
-        group.items.forEach((ev) => {
-          const evEl = document.createElement('div');
-          evEl.className = `calendar-event ${ev.category}`;
-          evEl.textContent = formatEventText(ev);
-          eventsDiv.appendChild(evEl);
-        });
+      todayEvents.forEach((ev) => {
+        const evEl = document.createElement('div');
+        evEl.className = `calendar-event ${ev.category}`;
+        evEl.textContent = formatEventText(ev);
+        eventsDiv.appendChild(evEl);
       });
     }
   }
