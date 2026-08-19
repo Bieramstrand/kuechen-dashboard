@@ -165,6 +165,18 @@
     .radar-recenter-btn:active {
       background: #E4DCC5;
     }
+    .home-marker-inner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #3C6E8F;
+      border: 3px solid #FBF8F1;
+      box-shadow: 0 1px 5px rgba(42,36,23,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
     .radar-embed {
       width: 100%;
       height: 100%;
@@ -726,6 +738,17 @@
       attribution: '© OpenStreetMap',
       maxZoom: 18
     }).addTo(map);
+
+    // Zuhause-Marker (eigenes Haus-Symbol statt Standard-Pin)
+    const homeIcon = L.divIcon({
+      className: 'home-marker',
+      html: '<div class="home-marker-inner">🏠</div>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    });
+    L.marker(HOME_VIEW.center, { icon: homeIcon, zIndexOffset: 1000 })
+      .addTo(map)
+      .bindPopup('Zuhause');
 
     document.getElementById('radarRecenterBtn').addEventListener('click', () => {
       map.setView(HOME_VIEW.center, HOME_VIEW.zoom);
