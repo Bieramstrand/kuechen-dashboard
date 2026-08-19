@@ -486,7 +486,10 @@
     <div class="panel" id="weatherPanel">
       <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
         <h2 class="panel-title" style="margin-bottom:0;">Regen Radar</h2>
-        <span id="currentTemp" style="font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem; color:#C4883A;"></span>
+        <div style="text-align:right;">
+          <span id="currentTemp" style="font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem; color:#C4883A;"></span>
+          <div id="tempDetail" style="font-size:0.7rem; color:#8A8069; margin-top:-2px;"></div>
+        </div>
       </div>
       <p class="panel-subtitle">Norderstedt – Regenradar</p>
       <div class="radar-timeline">
@@ -686,14 +689,24 @@
     return `${time} ${ev.title}`;
   }
   
-  // Aktuelle Temperatur für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
+  // Aktuelle Temperatur, gefühlte Temperatur und Tageshöchstwert für Norderstedt (Open-Meteo, kostenlos, kein Key nötig)
   async function loadTemperature() {
     try {
-      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.683943&longitude=9.979259&current=temperature_2m&timezone=Europe%2FBerlin');
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.683943&longitude=9.979259&current=temperature_2m,apparent_temperature&daily=temperature_2m_max&timezone=Europe%2FBerlin');
       const data = await res.json();
       const temp = data.current && data.current.temperature_2m;
+      const feelsLike = data.current && data.current.apparent_temperature;
+      const maxTemp = data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_max[0];
+
       if (temp != null) {
         document.getElementById('currentTemp').textContent = `${Math.round(temp)}°C`;
+      }
+      const detailEl = document.getElementById('tempDetail');
+      if (detailEl) {
+        const parts = [];
+        if (feelsLike != null) parts.push(`gefühlt ${Math.round(feelsLike)}°C`);
+        if (maxTemp != null) parts.push(`Max. ${Math.round(maxTemp)}°C`);
+        detailEl.textContent = parts.join(' · ');
       }
     } catch (e) {
       console.error('Temperatur-Fetch fehlgeschlagen:', e);
