@@ -61,13 +61,12 @@ exports.handler = async (event, context) => {
       start: { name: 'Garstedt', type: 'STATION' },
       dest: { name: 'Poppenbüttel', type: 'STATION' },
       time: { date: 'heute', time: 'jetzt' },
-      schedulesBefore: 0, // keine bereits vergangenen Verbindungen als Kontext mitliefern
-      schedulesAfter: 4, // ein paar weitere Verbindungen nach der besten mit anzeigen
+      schedulesAfter: 6, // Puffer, falls die API vereinzelt noch leicht vergangene Verbindungen mitliefert
     });
 
     const schedules = grResponse.schedules || [];
 
-    const connections = schedules.slice(0, 5).map((s) => {
+    const connections = schedules.slice(0, 7).map((s) => {
       const elements = s.scheduleElements || [];
       const first = elements[0];
       const last = elements[elements.length - 1];
