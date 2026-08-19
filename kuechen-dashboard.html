@@ -1321,17 +1321,31 @@
 
       // Zusaetzliche Absicherung: nur Verbindungen zeigen, deren Abfahrt nicht in der Vergangenheit liegt
       const now = new Date();
-      const upcoming = data.connections
-        .map((c) => ({ ...c, depDate: parseGtiTime(c.departureRaw) }))
-        .filter((c) => !c.depDate || c.depDate >= now)
-        .slice(0, 3);
+      const withDates = data.connections.map((c) => ({ ...c, depDate: parseGtiTime(c.departureRaw) }));
+      const future = withDates.filter((c) => !c.depDate || c.depDate >= now);
 
+      // Normalfall: nur zukuenftige Verbindungen zeigen. Falls die HVV-Antwort ausnahmsweise
+      // ausschliesslich bereits vergangene Zeiten liefert, lieber die naechstgelegenen zeigen
+      // (mit Hinweis) statt eine leere Liste
+      let upcoming = future.slice(0, 3);
+      let allPast = false;
       if (upcoming.length === 0) {
-        listEl.innerHTML = '<div class="hvv-error">Keine kommenden Verbindungen gefunden</div>';
-        return;
+        allPast = true;
+        upcoming = withDates
+          .slice()
+          .sort((a, b) => (b.depDate || 0) - (a.depDate || 0))
+          .slice(0, 3);
       }
 
-      listEl.innerHTML = upcoming.map((c) => {
+      if (allPast) {
+        const notice = document.createElement('div');
+        notice.style.cssText = 'font-size:0.7rem; color:#B5533C; margin-bottom:6px;';
+        notice.textContent = 'HVV liefert gerade nur kürzlich abgefahrene Verbindungen – bitte kurz erneut versuchen';
+        listEl.innerHTML = '';
+        listEl.appendChild(notice);
+      }
+
+      const itemsHtml = upcoming.map((c) => {
         const dep = c.depDate;
         const arr = parseGtiTime(c.arrivalRaw);
         const depStr = dep ? dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : (c.departureRaw || '?');
@@ -1345,6 +1359,7 @@
           </div>
         `;
       }).join('');
+      listEl.innerHTML += itemsHtml;
     } catch (e) {
       console.error('Poppenbüttel Route Fehler:', e);
       listEl.innerHTML = '<div class="hvv-error">Route nicht erreichbar</div>';
