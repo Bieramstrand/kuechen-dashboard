@@ -165,6 +165,35 @@
     .radar-recenter-btn:active {
       background: #E4DCC5;
     }
+    .refresh-fab {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 2000;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: #3C6E8F;
+      color: #FBF8F1;
+      font-size: 1.3rem;
+      box-shadow: 0 3px 10px rgba(42,36,23,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .refresh-fab:active {
+      background: #2E5A75;
+      transform: scale(0.95);
+    }
+    .refresh-fab.spinning {
+      animation: refresh-spin 0.6s linear;
+    }
+    @keyframes refresh-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     .home-marker-inner {
       width: 34px;
       height: 34px;
@@ -1591,5 +1620,12 @@
     }, 5 * 60 * 1000);
   })();
 </script>
+  <button id="refreshFab" class="refresh-fab" aria-label="Seite aktualisieren" title="Seite aktualisieren">⟳</button>
+  <script>
+    document.getElementById('refreshFab').addEventListener('click', function () {
+      this.classList.add('spinning');
+      setTimeout(() => location.reload(), 200);
+    });
+  </script>
 </body>
 </html>
