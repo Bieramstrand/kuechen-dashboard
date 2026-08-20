@@ -1393,11 +1393,12 @@
           .slice(0, 3);
       }
 
+      listEl.innerHTML = ''; // "Wird geladen…" & alte Inhalte immer erst entfernen
+
       if (allPast) {
         const notice = document.createElement('div');
         notice.style.cssText = 'font-size:0.7rem; color:#B5533C; margin-bottom:6px;';
         notice.textContent = 'HVV liefert gerade nur kürzlich abgefahrene Verbindungen – bitte kurz erneut versuchen';
-        listEl.innerHTML = '';
         listEl.appendChild(notice);
       }
 
