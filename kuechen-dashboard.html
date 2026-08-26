@@ -508,6 +508,113 @@
       color: #FBF8F1;
     }
     .modal-btn.ok:active { background: #2E5A75; }
+
+    /* Rezeptansicht Kachel */
+    .recipe-modal-card {
+      background: #FBF8F1;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 86vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(42,36,23,0.35);
+      border: 1px solid #E4DCC5;
+      position: relative;
+      padding: 22px 22px 26px;
+    }
+    .recipe-schliessen-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: #F1ECDD;
+      color: #8A8069;
+      font-size: 0.9rem;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .recipe-photo {
+      display: block;
+      width: calc(100% + 44px);
+      margin: -22px -22px 16px;
+      height: 200px;
+      object-fit: cover;
+    }
+    .recipe-kopf {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .recipe-emoji { font-size: 2.2rem; line-height: 1; }
+    .recipe-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: #2E2A22;
+      margin: 0;
+    }
+    .recipe-kategorie {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #8A8069;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 3px 0 0;
+    }
+    .recipe-portionen {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b6357;
+      margin: 14px 0 6px;
+    }
+    .recipe-zutaten-liste { margin-bottom: 12px; }
+    .recipe-zutat-zeile {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #E4DCC5;
+      font-size: 0.9rem;
+      color: #2E2A22;
+    }
+    .recipe-zutat-zeile:last-child { border-bottom: none; }
+    .recipe-zutat-zeile .z-name { font-weight: 600; }
+    .recipe-zutat-zeile .z-menge {
+      color: #8A8069;
+      font-weight: 600;
+      flex: none;
+      white-space: nowrap;
+    }
+    .recipe-zubereitung {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #2E2A22;
+      white-space: pre-wrap;
+    }
+    .recipe-quelle-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      border: 1px solid #E4DCC5;
+      background: #F1ECDD;
+      color: #3C6E8F;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 9px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .recipe-leer {
+      font-size: 0.9rem;
+      color: #8A8069;
+      text-align: center;
+      padding: 20px 4px 4px;
+    }
   </style>
 </head>
 <body>
@@ -636,6 +743,26 @@
     </div>
   </div>
 
+  <!-- Rezeptansicht für die "Was essen wir heute" Kachel -->
+  <div class="modal-overlay hidden" id="recipeModalOverlay">
+    <div class="recipe-modal-card">
+      <button class="recipe-schliessen-btn" id="recipeModalCloseBtn">✕</button>
+      <img id="recipeModalFoto" class="recipe-photo" style="display:none;">
+      <div class="recipe-kopf">
+        <span class="recipe-emoji" id="recipeModalEmoji">🍽️</span>
+        <div>
+          <p class="recipe-name" id="recipeModalName"></p>
+          <p class="recipe-kategorie" id="recipeModalKategorie"></p>
+        </div>
+      </div>
+      <p class="recipe-portionen" id="recipeModalPortionen"></p>
+      <div class="recipe-zutaten-liste" id="recipeModalZutaten"></div>
+      <p class="recipe-zubereitung" id="recipeModalZubereitung"></p>
+      <a id="recipeModalQuelle" href="#" target="_blank" rel="noopener" class="recipe-quelle-link" style="display:none;">🔗 Rezept öffnen</a>
+      <p class="recipe-leer" id="recipeModalLeer" style="display:none;">Für heute ist noch kein Rezept aus der Was-Essen-App verknüpft.</p>
+    </div>
+  </div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -683,6 +810,130 @@
 </script>
 <script>
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
+
+  // ---- Rezeptansicht für die "Was essen wir heute" Kachel ----
+  let aktuellesGerichtIdHeute = null;
+
+  const ZUTAT_ICONS_DB = [
+    [['hackfleisch','rinderhack','schweinehack'], '🥩'],
+    [['hähnchen','huhn','geflügel','pute'], '🍗'],
+    [['speck','bacon','schinken'], '🥓'],
+    [['lachs','thunfisch','garnele','fisch'], '🐟'],
+    [['ei','eier'], '🥚'],
+    [['milch'], '🥛'],
+    [['sahne','crème fraîche','schmand','crèmefine'], '🥛'],
+    [['butter'], '🧈'],
+    [['käse','parmesan','mozzarella','feta'], '🧀'],
+    [['quark','joghurt'], '🥣'],
+    [['zwiebel','schalotte'], '🧅'],
+    [['knoblauch'], '🧄'],
+    [['tomate'], '🍅'],
+    [['kartoffel'], '🥔'],
+    [['karotte','möhre'], '🥕'],
+    [['paprika'], '🫑'],
+    [['spinat','salat','kohl'], '🥬'],
+    [['pilz','champignon'], '🍄'],
+    [['zitrone','limette'], '🍋'],
+    [['mehl'], '🌾'],
+    [['zucker'], '🍬'],
+    [['salz'], '🧂'],
+    [['pfeffer'], '🧂'],
+    [['reis'], '🍚'],
+    [['nudel','pasta','spaghetti'], '🍝'],
+    [['brot','brötchen'], '🍞'],
+    [['öl'], '🫒'],
+    [['honig'], '🍯'],
+    [['kräuter','petersilie','basilikum'], '🌿'],
+  ];
+  function ermittleZutatIconDB(name){
+    const n = (name || '').toLowerCase();
+    for (const [b, icon] of ZUTAT_ICONS_DB) { if (b.some(x => n.includes(x))) return icon; }
+    return '🥄';
+  }
+
+  async function oeffneRezeptAusKachel(){
+    const overlay = document.getElementById('recipeModalOverlay');
+    overlay.classList.remove('hidden');
+
+    document.getElementById('recipeModalFoto').style.display = 'none';
+    document.getElementById('recipeModalName').textContent = '';
+    document.getElementById('recipeModalKategorie').textContent = '';
+    document.getElementById('recipeModalPortionen').textContent = '';
+    document.getElementById('recipeModalZutaten').innerHTML = '';
+    document.getElementById('recipeModalZubereitung').textContent = '';
+    document.getElementById('recipeModalQuelle').style.display = 'none';
+    document.getElementById('recipeModalLeer').style.display = 'none';
+
+    if (!aktuellesGerichtIdHeute) {
+      document.getElementById('recipeModalLeer').style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await window.storage.get('essenapp:gerichte', true);
+      const gerichte = res && res.value ? JSON.parse(res.value) : [];
+      const gericht = gerichte.find(g => g.id === aktuellesGerichtIdHeute);
+
+      if (!gericht) {
+        document.getElementById('recipeModalLeer').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('recipeModalEmoji').textContent = gericht.emoji || '🍽️';
+      document.getElementById('recipeModalName').textContent = gericht.name || '';
+      document.getElementById('recipeModalKategorie').textContent = gericht.kategorie || '';
+
+      if (gericht.foto) {
+        const fotoEl = document.getElementById('recipeModalFoto');
+        fotoEl.src = gericht.foto;
+        fotoEl.style.display = 'block';
+      }
+
+      if (gericht.portionen) {
+        document.getElementById('recipeModalPortionen').textContent = `Für ${gericht.portionen} Portionen`;
+      }
+
+      const zutatenListe = document.getElementById('recipeModalZutaten');
+      (gericht.zutaten || []).forEach(z => {
+        const zeile = document.createElement('div');
+        zeile.className = 'recipe-zutat-zeile';
+        const mengeText = [z.menge, z.einheit].filter(Boolean).join(' ');
+        zeile.innerHTML = `
+          <span class="z-name">${ermittleZutatIconDB(z.name)} ${z.name}</span>
+          <span class="z-menge">${mengeText}</span>
+        `;
+        zutatenListe.appendChild(zeile);
+      });
+
+      const zubereitungText = gericht.zubereitung || gericht.rezept || '';
+      document.getElementById('recipeModalZubereitung').textContent = zubereitungText;
+
+      if (gericht.quelle) {
+        const quelleLink = document.getElementById('recipeModalQuelle');
+        quelleLink.href = gericht.quelle;
+        quelleLink.textContent = /cookidoo|rezeptwelt/i.test(gericht.quelle) ? '🔗 In Cookidoo öffnen'
+          : /picnic/i.test(gericht.quelle) ? '🔗 In Picnic öffnen'
+          : '🔗 Rezept öffnen';
+        quelleLink.style.display = 'inline-flex';
+      }
+
+      if (!(gericht.zutaten && gericht.zutaten.length) && !zubereitungText && !gericht.quelle) {
+        document.getElementById('recipeModalLeer').textContent = 'Zu diesem Gericht sind noch keine Rezeptdetails hinterlegt.';
+        document.getElementById('recipeModalLeer').style.display = 'block';
+      }
+    } catch (e) {
+      console.error('Rezept laden fehlgeschlagen', e);
+      document.getElementById('recipeModalLeer').style.display = 'block';
+    }
+  }
+
+  document.getElementById('recipeModalCloseBtn').addEventListener('click', () => {
+    document.getElementById('recipeModalOverlay').classList.add('hidden');
+  });
+  document.getElementById('recipeModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'recipeModalOverlay') e.target.classList.add('hidden');
+  });
+
 
   // Eigenes Eingabefenster statt Browser-prompt() – gleiche Nutzung: await customPrompt(titel, hinweis)
   function customPrompt(title, hint) {
@@ -1488,11 +1739,14 @@
         const today = localDateKey(new Date());
         if (meal.date === today) {
           document.getElementById('todaysMeal').textContent = meal.text || '—';
+          aktuellesGerichtIdHeute = meal.gerichtId || null;
         } else {
           document.getElementById('todaysMeal').textContent = '—';
+          aktuellesGerichtIdHeute = null;
         }
       } else {
         document.getElementById('todaysMeal').textContent = '—';
+        aktuellesGerichtIdHeute = null;
       }
 
       const tomorrowMealData = await window.storage.get('household:tomorrows-meal', true);
@@ -1542,12 +1796,7 @@
   // Click Handler für Meal, Tasks und HVV
   document.addEventListener('click', async (e) => {
     if (e.target.id === 'todaysMeal') {
-      const input = await customPrompt('Was essen wir heute?', 'z.B. "Pasta Bolognese"');
-      if (input !== null) {
-        const today = localDateKey(new Date());
-        await window.storage.set('household:todays-meal', JSON.stringify({ date: today, text: input }), true);
-        document.getElementById('todaysMeal').textContent = input || '—';
-      }
+      oeffneRezeptAusKachel();
     }
     
     if (e.target.closest('#pinnwandCard')) {
