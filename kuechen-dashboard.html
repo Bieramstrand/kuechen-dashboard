@@ -397,6 +397,12 @@
       user-select: none;
       margin-top: 2px;
     }
+    .action-subvalue {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #6b6357;
+      margin-top: 4px;
+    }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -589,6 +595,7 @@
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
           <span class="action-value" id="todaysMeal">—</span>
+          <span class="action-subvalue" id="tomorrowsMeal" style="display:none;"></span>
         </div>
         <div class="action-card" style="background:#F1ECDD; flex-direction:row; align-items:center; justify-content:center; gap:24px;">
           <a href="https://bieramstrand.de" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
@@ -1474,7 +1481,7 @@
         previewEl.innerHTML = '';
       }
       
-      // Was essen wir heute
+      // Was essen wir heute / morgen
       const mealData = await window.storage.get('household:todays-meal', true);
       if (mealData) {
         const meal = JSON.parse(mealData.value);
@@ -1486,6 +1493,23 @@
         }
       } else {
         document.getElementById('todaysMeal').textContent = '—';
+      }
+
+      const tomorrowMealData = await window.storage.get('household:tomorrows-meal', true);
+      const tomorrowEl = document.getElementById('tomorrowsMeal');
+      if (tomorrowMealData) {
+        const tomorrowMeal = JSON.parse(tomorrowMealData.value);
+        const morgenDatum = new Date();
+        morgenDatum.setDate(morgenDatum.getDate() + 1);
+        const morgen = localDateKey(morgenDatum);
+        if (tomorrowMeal.date === morgen && tomorrowMeal.text) {
+          tomorrowEl.textContent = `Morgen: ${tomorrowMeal.text}`;
+          tomorrowEl.style.display = 'block';
+        } else {
+          tomorrowEl.style.display = 'none';
+        }
+      } else {
+        tomorrowEl.style.display = 'none';
       }
       
       // Pinnwand (aus der Pinnwand-App: Speicherschlüssel "tasks", Felder title/status/category)
