@@ -397,12 +397,6 @@
       user-select: none;
       margin-top: 2px;
     }
-    .action-subvalue {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #6b6357;
-      margin-top: 4px;
-    }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -508,112 +502,31 @@
       color: #FBF8F1;
     }
     .modal-btn.ok:active { background: #2E5A75; }
-
-    /* Rezeptansicht Kachel */
-    .recipe-modal-card {
-      background: #FBF8F1;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 86vh;
+    .list-picker-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+      max-height: 50vh;
       overflow-y: auto;
-      box-shadow: 0 12px 40px rgba(42,36,23,0.35);
-      border: 1px solid #E4DCC5;
-      position: relative;
-      padding: 22px 22px 26px;
     }
-    .recipe-schliessen-btn {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: #F1ECDD;
-      color: #8A8069;
-      font-size: 0.9rem;
-      cursor: pointer;
-      z-index: 2;
-    }
-    .recipe-photo {
-      display: block;
-      width: calc(100% + 44px);
-      margin: -22px -22px 16px;
-      height: 200px;
-      object-fit: cover;
-    }
-    .recipe-kopf {
+    .list-picker-option {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-    .recipe-emoji { font-size: 2.2rem; line-height: 1; }
-    .recipe-name {
-      font-family: 'Fraunces', serif;
-      font-weight: 600;
-      font-size: 1.35rem;
-      color: #2E2A22;
-      margin: 0;
-    }
-    .recipe-kategorie {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #8A8069;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin: 3px 0 0;
-    }
-    .recipe-portionen {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #6b6357;
-      margin: 14px 0 6px;
-    }
-    .recipe-zutaten-liste { margin-bottom: 12px; }
-    .recipe-zutat-zeile {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 7px 0;
-      border-bottom: 1px solid #E4DCC5;
-      font-size: 0.9rem;
-      color: #2E2A22;
-    }
-    .recipe-zutat-zeile:last-child { border-bottom: none; }
-    .recipe-zutat-zeile .z-name { font-weight: 600; }
-    .recipe-zutat-zeile .z-menge {
-      color: #8A8069;
-      font-weight: 600;
-      flex: none;
-      white-space: nowrap;
-    }
-    .recipe-zubereitung {
-      font-size: 0.88rem;
-      line-height: 1.6;
-      color: #2E2A22;
-      white-space: pre-wrap;
-    }
-    .recipe-quelle-link {
-      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      margin-top: 14px;
-      border: 1px solid #E4DCC5;
-      background: #F1ECDD;
-      color: #3C6E8F;
-      font-weight: 600;
-      font-size: 0.85rem;
-      padding: 9px 14px;
+      gap: 10px;
+      padding: 12px 14px;
       border-radius: 8px;
-      text-decoration: none;
+      background: #F1ECDD;
+      border: 2px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #2E2A22;
+      cursor: pointer;
+      text-align: left;
     }
-    .recipe-leer {
-      font-size: 0.9rem;
-      color: #8A8069;
-      text-align: center;
-      padding: 20px 4px 4px;
+    .list-picker-option:active {
+      border-color: #3C6E8F;
+      background: #E4DCC5;
     }
   </style>
 </head>
@@ -702,7 +615,6 @@
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
           <span class="action-value" id="todaysMeal">—</span>
-          <span class="action-subvalue" id="tomorrowsMeal" style="display:none;"></span>
         </div>
         <div class="action-card" style="background:#F1ECDD; flex-direction:row; align-items:center; justify-content:center; gap:24px;">
           <a href="https://bieramstrand.de" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
@@ -743,23 +655,14 @@
     </div>
   </div>
 
-  <!-- Rezeptansicht für die "Was essen wir heute" Kachel -->
-  <div class="modal-overlay hidden" id="recipeModalOverlay">
-    <div class="recipe-modal-card">
-      <button class="recipe-schliessen-btn" id="recipeModalCloseBtn">✕</button>
-      <img id="recipeModalFoto" class="recipe-photo" style="display:none;">
-      <div class="recipe-kopf">
-        <span class="recipe-emoji" id="recipeModalEmoji">🍽️</span>
-        <div>
-          <p class="recipe-name" id="recipeModalName"></p>
-          <p class="recipe-kategorie" id="recipeModalKategorie"></p>
-        </div>
+  <!-- Auswahlfenster: in welche Einkaufsliste soll eingetragen werden -->
+  <div class="modal-overlay hidden" id="listPickerOverlay">
+    <div class="modal-card">
+      <p class="modal-title">In welche Liste?</p>
+      <div class="list-picker-options" id="listPickerOptions"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="listPickerCancelBtn">Abbrechen</button>
       </div>
-      <p class="recipe-portionen" id="recipeModalPortionen"></p>
-      <div class="recipe-zutaten-liste" id="recipeModalZutaten"></div>
-      <p class="recipe-zubereitung" id="recipeModalZubereitung"></p>
-      <a id="recipeModalQuelle" href="#" target="_blank" rel="noopener" class="recipe-quelle-link" style="display:none;">🔗 Rezept öffnen</a>
-      <p class="recipe-leer" id="recipeModalLeer" style="display:none;">Für heute ist noch kein Rezept aus der Was-Essen-App verknüpft.</p>
     </div>
   </div>
 
@@ -811,130 +714,6 @@
 <script>
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
 
-  // ---- Rezeptansicht für die "Was essen wir heute" Kachel ----
-  let aktuellesGerichtIdHeute = null;
-
-  const ZUTAT_ICONS_DB = [
-    [['hackfleisch','rinderhack','schweinehack'], '🥩'],
-    [['hähnchen','huhn','geflügel','pute'], '🍗'],
-    [['speck','bacon','schinken'], '🥓'],
-    [['lachs','thunfisch','garnele','fisch'], '🐟'],
-    [['ei','eier'], '🥚'],
-    [['milch'], '🥛'],
-    [['sahne','crème fraîche','schmand','crèmefine'], '🥛'],
-    [['butter'], '🧈'],
-    [['käse','parmesan','mozzarella','feta'], '🧀'],
-    [['quark','joghurt'], '🥣'],
-    [['zwiebel','schalotte'], '🧅'],
-    [['knoblauch'], '🧄'],
-    [['tomate'], '🍅'],
-    [['kartoffel'], '🥔'],
-    [['karotte','möhre'], '🥕'],
-    [['paprika'], '🫑'],
-    [['spinat','salat','kohl'], '🥬'],
-    [['pilz','champignon'], '🍄'],
-    [['zitrone','limette'], '🍋'],
-    [['mehl'], '🌾'],
-    [['zucker'], '🍬'],
-    [['salz'], '🧂'],
-    [['pfeffer'], '🧂'],
-    [['reis'], '🍚'],
-    [['nudel','pasta','spaghetti'], '🍝'],
-    [['brot','brötchen'], '🍞'],
-    [['öl'], '🫒'],
-    [['honig'], '🍯'],
-    [['kräuter','petersilie','basilikum'], '🌿'],
-  ];
-  function ermittleZutatIconDB(name){
-    const n = (name || '').toLowerCase();
-    for (const [b, icon] of ZUTAT_ICONS_DB) { if (b.some(x => n.includes(x))) return icon; }
-    return '🥄';
-  }
-
-  async function oeffneRezeptAusKachel(){
-    const overlay = document.getElementById('recipeModalOverlay');
-    overlay.classList.remove('hidden');
-
-    document.getElementById('recipeModalFoto').style.display = 'none';
-    document.getElementById('recipeModalName').textContent = '';
-    document.getElementById('recipeModalKategorie').textContent = '';
-    document.getElementById('recipeModalPortionen').textContent = '';
-    document.getElementById('recipeModalZutaten').innerHTML = '';
-    document.getElementById('recipeModalZubereitung').textContent = '';
-    document.getElementById('recipeModalQuelle').style.display = 'none';
-    document.getElementById('recipeModalLeer').style.display = 'none';
-
-    if (!aktuellesGerichtIdHeute) {
-      document.getElementById('recipeModalLeer').style.display = 'block';
-      return;
-    }
-
-    try {
-      const res = await window.storage.get('essenapp:gerichte', true);
-      const gerichte = res && res.value ? JSON.parse(res.value) : [];
-      const gericht = gerichte.find(g => g.id === aktuellesGerichtIdHeute);
-
-      if (!gericht) {
-        document.getElementById('recipeModalLeer').style.display = 'block';
-        return;
-      }
-
-      document.getElementById('recipeModalEmoji').textContent = gericht.emoji || '🍽️';
-      document.getElementById('recipeModalName').textContent = gericht.name || '';
-      document.getElementById('recipeModalKategorie').textContent = gericht.kategorie || '';
-
-      if (gericht.foto) {
-        const fotoEl = document.getElementById('recipeModalFoto');
-        fotoEl.src = gericht.foto;
-        fotoEl.style.display = 'block';
-      }
-
-      if (gericht.portionen) {
-        document.getElementById('recipeModalPortionen').textContent = `Für ${gericht.portionen} Portionen`;
-      }
-
-      const zutatenListe = document.getElementById('recipeModalZutaten');
-      (gericht.zutaten || []).forEach(z => {
-        const zeile = document.createElement('div');
-        zeile.className = 'recipe-zutat-zeile';
-        const mengeText = [z.menge, z.einheit].filter(Boolean).join(' ');
-        zeile.innerHTML = `
-          <span class="z-name">${ermittleZutatIconDB(z.name)} ${z.name}</span>
-          <span class="z-menge">${mengeText}</span>
-        `;
-        zutatenListe.appendChild(zeile);
-      });
-
-      const zubereitungText = gericht.zubereitung || gericht.rezept || '';
-      document.getElementById('recipeModalZubereitung').textContent = zubereitungText;
-
-      if (gericht.quelle) {
-        const quelleLink = document.getElementById('recipeModalQuelle');
-        quelleLink.href = gericht.quelle;
-        quelleLink.textContent = /cookidoo|rezeptwelt/i.test(gericht.quelle) ? '🔗 In Cookidoo öffnen'
-          : /picnic/i.test(gericht.quelle) ? '🔗 In Picnic öffnen'
-          : '🔗 Rezept öffnen';
-        quelleLink.style.display = 'inline-flex';
-      }
-
-      if (!(gericht.zutaten && gericht.zutaten.length) && !zubereitungText && !gericht.quelle) {
-        document.getElementById('recipeModalLeer').textContent = 'Zu diesem Gericht sind noch keine Rezeptdetails hinterlegt.';
-        document.getElementById('recipeModalLeer').style.display = 'block';
-      }
-    } catch (e) {
-      console.error('Rezept laden fehlgeschlagen', e);
-      document.getElementById('recipeModalLeer').style.display = 'block';
-    }
-  }
-
-  document.getElementById('recipeModalCloseBtn').addEventListener('click', () => {
-    document.getElementById('recipeModalOverlay').classList.add('hidden');
-  });
-  document.getElementById('recipeModalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'recipeModalOverlay') e.target.classList.add('hidden');
-  });
-
-
   // Eigenes Eingabefenster statt Browser-prompt() – gleiche Nutzung: await customPrompt(titel, hinweis)
   function customPrompt(title, hint) {
     return new Promise((resolve) => {
@@ -971,6 +750,36 @@
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+  }
+
+  // Zeigt eine Liste von Listen als Buttons an, gibt die gewaehlte Liste zurueck (oder null bei Abbruch)
+  function pickList(lists) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('listPickerOverlay');
+      const optionsEl = document.getElementById('listPickerOptions');
+      const cancelBtn = document.getElementById('listPickerCancelBtn');
+
+      optionsEl.innerHTML = '';
+      const buttons = [];
+      lists.forEach((list) => {
+        const btn = document.createElement('button');
+        btn.className = 'list-picker-option';
+        btn.innerHTML = `<span>${list.icon || '📝'}</span><span>${escapeHtml(list.name)}</span>`;
+        btn.addEventListener('click', () => cleanup(list));
+        optionsEl.appendChild(btn);
+        buttons.push(btn);
+      });
+
+      overlay.classList.remove('hidden');
+
+      function cleanup(result) {
+        overlay.classList.add('hidden');
+        cancelBtn.removeEventListener('click', onCancel);
+        resolve(result);
+      }
+      function onCancel() { cleanup(null); }
+      cancelBtn.addEventListener('click', onCancel);
+    });
   }
 
   // Liefert TT-MM-JJJJ als lokales Datum (NICHT über toISOString, das würde wegen
@@ -1732,38 +1541,18 @@
         previewEl.innerHTML = '';
       }
       
-      // Was essen wir heute / morgen
+      // Was essen wir heute
       const mealData = await window.storage.get('household:todays-meal', true);
       if (mealData) {
         const meal = JSON.parse(mealData.value);
         const today = localDateKey(new Date());
         if (meal.date === today) {
           document.getElementById('todaysMeal').textContent = meal.text || '—';
-          aktuellesGerichtIdHeute = meal.gerichtId || null;
         } else {
           document.getElementById('todaysMeal').textContent = '—';
-          aktuellesGerichtIdHeute = null;
         }
       } else {
         document.getElementById('todaysMeal').textContent = '—';
-        aktuellesGerichtIdHeute = null;
-      }
-
-      const tomorrowMealData = await window.storage.get('household:tomorrows-meal', true);
-      const tomorrowEl = document.getElementById('tomorrowsMeal');
-      if (tomorrowMealData) {
-        const tomorrowMeal = JSON.parse(tomorrowMealData.value);
-        const morgenDatum = new Date();
-        morgenDatum.setDate(morgenDatum.getDate() + 1);
-        const morgen = localDateKey(morgenDatum);
-        if (tomorrowMeal.date === morgen && tomorrowMeal.text) {
-          tomorrowEl.textContent = `Morgen: ${tomorrowMeal.text}`;
-          tomorrowEl.style.display = 'block';
-        } else {
-          tomorrowEl.style.display = 'none';
-        }
-      } else {
-        tomorrowEl.style.display = 'none';
       }
       
       // Pinnwand (aus der Pinnwand-App: Speicherschlüssel "tasks", Felder title/status/category)
@@ -1796,7 +1585,12 @@
   // Click Handler für Meal, Tasks und HVV
   document.addEventListener('click', async (e) => {
     if (e.target.id === 'todaysMeal') {
-      oeffneRezeptAusKachel();
+      const input = await customPrompt('Was essen wir heute?', 'z.B. "Pasta Bolognese"');
+      if (input !== null) {
+        const today = localDateKey(new Date());
+        await window.storage.set('household:todays-meal', JSON.stringify({ date: today, text: input }), true);
+        document.getElementById('todaysMeal').textContent = input || '—';
+      }
     }
     
     if (e.target.closest('#pinnwandCard')) {
@@ -1826,7 +1620,7 @@
       if (itemInput !== null && itemInput.trim()) {
         const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
 
-        // Gleiche Listen-Struktur wie im Einkaufszettel: Liste "Einkaufsliste" gezielt verwenden, notfalls anlegen
+        // Alle vorhandenen Listen laden (Einkaufsliste, Rewe, Edeka, ...), "Einkaufsliste" notfalls anlegen
         let lists = [];
         try {
           const existingLists = await window.storage.get('shoppingapp:lists', true);
@@ -1845,7 +1639,11 @@
           lists.push(einkaufsliste);
           await window.storage.set('shoppingapp:lists', JSON.stringify(lists), true);
         }
-        const targetListId = einkaufsliste.id;
+
+        // Nutzer waehlen lassen, in welche Liste eingetragen werden soll
+        const chosenList = await pickList(lists);
+        if (!chosenList) return; // abgebrochen
+        const targetListId = chosenList.id;
 
         let items = [];
         try {
