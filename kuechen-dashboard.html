@@ -615,6 +615,7 @@
         <div class="action-card ocean">
           <span class="action-title">Was essen wir heute</span>
           <span class="action-value" id="todaysMeal">—</span>
+          <div id="tomorrowsMeal" class="shopping-preview"></div>
         </div>
         <div class="action-card" style="background:#F1ECDD; flex-direction:row; align-items:center; justify-content:center; gap:24px;">
           <a href="https://bieramstrand.de" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none;">
@@ -1553,6 +1554,25 @@
         }
       } else {
         document.getElementById('todaysMeal').textContent = '—';
+      }
+
+      // Was essen wir morgen (kleine Vorschau)
+      const tomorrowMealEl = document.getElementById('tomorrowsMeal');
+      if (tomorrowMealEl) {
+        try {
+          const tomorrowData = await window.storage.get('household:tomorrows-meal', true);
+          const tomorrowKey = localDateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));
+          if (tomorrowData && tomorrowData.value) {
+            const tomorrowMeal = JSON.parse(tomorrowData.value);
+            tomorrowMealEl.textContent = (tomorrowMeal.date === tomorrowKey && tomorrowMeal.text)
+              ? `Morgen: ${tomorrowMeal.text}`
+              : '';
+          } else {
+            tomorrowMealEl.textContent = '';
+          }
+        } catch (e) {
+          tomorrowMealEl.textContent = '';
+        }
       }
       
       // Pinnwand (aus der Pinnwand-App: Speicherschlüssel "tasks", Felder title/status/category)
