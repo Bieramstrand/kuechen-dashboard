@@ -530,6 +530,116 @@
       border-color: #3C6E8F;
       background: #E4DCC5;
     }
+
+    /* Rezept-Ansicht im Stil der "Was essen wir heute?"-App */
+    .recipe-sheet-overlay {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: rgba(43,42,40,0.45);
+      z-index: 3000;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+    .recipe-sheet-overlay.hidden { display: none; }
+    .recipe-sheet-box {
+      background: #FFFFFF;
+      color: #2B2A28;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border-radius: 20px 20px 0 0;
+      padding: 22px 20px 26px;
+      -webkit-overflow-scrolling: touch;
+      text-align: left;
+    }
+    @media (min-width: 640px) {
+      .recipe-sheet-overlay { align-items: center; padding: 20px; }
+      .recipe-sheet-box { border-radius: 16px; }
+    }
+    .recipe-sheet-foto {
+      display: block;
+      width: calc(100% + 40px);
+      margin: -22px -20px 16px;
+      height: 220px;
+      object-fit: cover;
+      object-position: center;
+    }
+    @media (min-width: 640px) {
+      .recipe-sheet-foto { border-radius: 16px 16px 0 0; }
+    }
+    .recipe-sheet-kopf {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .recipe-sheet-emoji { font-size: 36px; }
+    .recipe-sheet-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+      margin: 10px 0 2px;
+      color: #2B2A28;
+    }
+    .recipe-sheet-kategorie {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8A8069;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    .recipe-zutat-zeile {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #E4E0D8;
+      font-size: 14px;
+    }
+    .recipe-zutat-zeile:last-child { border-bottom: none; }
+    .recipe-zutat-links { display: flex; align-items: center; gap: 10px; }
+    .recipe-zutat-name { font-weight: 600; color: #2B2A28; }
+    .recipe-zutat-menge { color: #8A8069; font-weight: 600; flex: none; white-space: nowrap; }
+    .recipe-sheet-zubereitung {
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #2B2A28;
+      margin-top: 6px;
+    }
+    .recipe-sheet-quelle-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      border: 1px solid #E4E0D8;
+      background: #F7F5F0;
+      color: #8A6A4F;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .recipe-sheet-leer { font-size: 13px; color: #8A8069; margin-bottom: 10px; }
+    .recipe-sheet-aktionen { display: flex; gap: 8px; margin-top: 16px; }
+    .recipe-sheet-schliessen-btn {
+      flex: 1;
+      border: 1px solid #2B2A28;
+      background: #2B2A28;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 11px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .recipe-sheet-schliessen-btn:active { opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -658,15 +768,23 @@
     </div>
   </div>
 
-  <!-- Rezept-Ansicht -->
-  <div class="modal-overlay hidden" id="recipeModalOverlay">
-    <div class="modal-card" style="max-height:80vh; overflow-y:auto; text-align:left;">
-      <p class="modal-title" id="recipeModalTitle">Gericht</p>
-      <p class="modal-hint" id="recipeModalMeta"></p>
-      <div id="recipeModalZutaten" style="margin:10px 0; font-size:0.9rem;"></div>
-      <div id="recipeModalZubereitung" style="font-size:0.9rem; line-height:1.5; white-space:pre-wrap;"></div>
-      <div class="modal-actions">
-        <button class="modal-btn ok" id="recipeModalCloseBtn">Schließen</button>
+  <!-- Rezept-Ansicht, im Stil der "Was essen wir heute?"-App -->
+  <div class="recipe-sheet-overlay hidden" id="recipeModalOverlay">
+    <div class="recipe-sheet-box">
+      <img id="recipeModalFoto" class="recipe-sheet-foto" style="display:none;">
+      <div class="recipe-sheet-kopf">
+        <span class="recipe-sheet-emoji" id="recipeModalEmoji">🍽️</span>
+      </div>
+      <div class="recipe-sheet-name" id="recipeModalTitle">Gericht</div>
+      <div class="recipe-sheet-kategorie" id="recipeModalMeta"></div>
+
+      <div id="recipeModalZutaten"></div>
+      <div class="recipe-sheet-zubereitung" id="recipeModalZubereitung"></div>
+      <a id="recipeModalQuelle" href="#" target="_blank" rel="noopener" class="recipe-sheet-quelle-link" style="display:none;">🔗 Rezept öffnen</a>
+      <div class="recipe-sheet-leer" id="recipeModalLeer" style="display:none;">Kein Rezept hinterlegt.</div>
+
+      <div class="recipe-sheet-aktionen">
+        <button class="recipe-sheet-schliessen-btn" id="recipeModalCloseBtn">Schließen</button>
       </div>
     </div>
   </div>
@@ -798,18 +916,27 @@
     });
   }
 
-  // Zeigt das vollstaendige Rezept eines Gerichts (Zutaten + Zubereitung) aus 'essenapp:gerichte'
+  // Zeigt das vollstaendige Rezept eines Gerichts (Zutaten + Zubereitung) aus 'essenapp:gerichte',
+  // im gleichen Bottom-Sheet-Stil wie in der "Was essen wir heute?"-App
   async function showRecipeModal(gerichtId) {
     const overlay = document.getElementById('recipeModalOverlay');
+    const fotoEl = document.getElementById('recipeModalFoto');
+    const emojiEl = document.getElementById('recipeModalEmoji');
     const titleEl = document.getElementById('recipeModalTitle');
     const metaEl = document.getElementById('recipeModalMeta');
     const zutatenEl = document.getElementById('recipeModalZutaten');
     const zubereitungEl = document.getElementById('recipeModalZubereitung');
+    const quelleEl = document.getElementById('recipeModalQuelle');
+    const leerEl = document.getElementById('recipeModalLeer');
 
+    fotoEl.style.display = 'none';
+    emojiEl.textContent = '🍽️';
     titleEl.textContent = 'Lädt…';
     metaEl.textContent = '';
     zutatenEl.innerHTML = '';
     zubereitungEl.textContent = '';
+    quelleEl.style.display = 'none';
+    leerEl.style.display = 'none';
     overlay.classList.remove('hidden');
 
     try {
@@ -819,19 +946,44 @@
 
       if (!gericht) {
         titleEl.textContent = 'Rezept nicht gefunden';
-        metaEl.textContent = '';
       } else {
-        titleEl.textContent = `${gericht.emoji || ''} ${gericht.name || ''}`.trim();
-        metaEl.textContent = gericht.portionen ? `Für ${gericht.portionen} Portionen` : '';
+        if (gericht.foto) {
+          fotoEl.src = gericht.foto;
+          fotoEl.style.display = 'block';
+        }
+        emojiEl.textContent = gericht.emoji || '🍽️';
+        titleEl.textContent = gericht.name || '';
+        metaEl.textContent = gericht.kategorie || '';
 
-        if (gericht.zutaten && gericht.zutaten.length > 0) {
-          zutatenEl.innerHTML = '<strong>Zutaten</strong><br>' + gericht.zutaten.map((z) => {
-            const mengeStr = (z.menge != null && z.menge !== '') ? `${z.menge} ${z.einheit || ''}`.trim() : '';
-            return `• ${escapeHtml([mengeStr, z.name].filter(Boolean).join(' '))}`;
-          }).join('<br>');
+        const hatZutaten = gericht.zutaten && gericht.zutaten.length > 0;
+        if (hatZutaten) {
+          zutatenEl.innerHTML = gericht.zutaten.map((z) => {
+            const mengeText = [z.menge, z.einheit].filter((v) => v != null && v !== '').join(' ');
+            return `
+              <div class="recipe-zutat-zeile">
+                <span class="recipe-zutat-links">
+                  <span class="recipe-zutat-name">${escapeHtml(z.name || '')}</span>
+                </span>
+                <span class="recipe-zutat-menge">${escapeHtml(mengeText)}</span>
+              </div>
+            `;
+          }).join('');
         }
 
-        zubereitungEl.textContent = gericht.zubereitung || (gericht.zutaten && gericht.zutaten.length > 0 ? '' : 'Kein Rezept hinterlegt.');
+        const zubereitungText = gericht.zubereitung || gericht.rezept || '';
+        zubereitungEl.textContent = zubereitungText;
+
+        if (gericht.quelle) {
+          quelleEl.href = gericht.quelle;
+          let linkText = '🔗 Rezept öffnen';
+          if (/cookidoo/i.test(gericht.quelle)) linkText = '🔗 In Cookidoo öffnen';
+          else if (/rezeptwelt/i.test(gericht.quelle)) linkText = '🔗 In Rezeptwelt öffnen';
+          else if (/picnic/i.test(gericht.quelle)) linkText = '🔗 In Picnic öffnen';
+          quelleEl.textContent = linkText;
+          quelleEl.style.display = 'inline-flex';
+        }
+
+        leerEl.style.display = (!hatZutaten && !zubereitungText && !gericht.quelle) ? 'block' : 'none';
       }
     } catch (e) {
       titleEl.textContent = 'Fehler beim Laden';
