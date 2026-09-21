@@ -1760,42 +1760,67 @@
         previewEl.innerHTML = '';
       }
       
-      // Was essen wir heute
-      const mealData = await window.storage.get('household:todays-meal', true);
-      if (mealData) {
-        const meal = JSON.parse(mealData.value);
-        const today = localDateKey(new Date());
-        if (meal.date === today) {
-          document.getElementById('todaysMeal').textContent = meal.text || '—';
-          currentMealGerichtId = meal.gerichtId || null;
-        } else {
-          document.getElementById('todaysMeal').textContent = '—';
-          currentMealGerichtId = null;
-        }
-      } else {
-        document.getElementById('todaysMeal').textContent = '—';
-        currentMealGerichtId = null;
+      // Was essen wir heute/morgen – direkt aus dem Wochenplan der "Was essen wir heute?"-App
+      // berechnet (nicht aus dem reaktiven "household:todays-meal"-Zwischenspeicher, der nur
+      // aktualisiert wird, wenn jemand die App oeffnet oder etwas darin aendert)
+      function montagDerWoche(datum) {
+        const d = new Date(datum);
+        const wochentag = d.getDay(); // 0=So, 1=Mo, ...
+        const differenz = wochentag === 0 ? -6 : 1 - wochentag;
+        d.setDate(d.getDate() + differenz);
+        d.setHours(0, 0, 0, 0);
+        return d;
       }
 
-      // Was essen wir morgen (kleine Vorschau)
-      const tomorrowMealEl = document.getElementById('tomorrowsMeal');
-      if (tomorrowMealEl) {
-        try {
-          const tomorrowData = await window.storage.get('household:tomorrows-meal', true);
-          const tomorrowKey = localDateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));
-          if (tomorrowData && tomorrowData.value) {
-            const tomorrowMeal = JSON.parse(tomorrowData.value);
-            tomorrowMealEl.textContent = (tomorrowMeal.date === tomorrowKey && tomorrowMeal.text)
-              ? `Morgen: ${tomorrowMeal.text}`
-              : '';
-          } else {
-            tomorrowMealEl.textContent = '';
-          }
-        } catch (e) {
-          tomorrowMealEl.textContent = '';
+      try {
+        const heute = new Date();
+        const morgen = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const heuteKey = localDateKey(heute);
+        const morgenKey = localDateKey(morgen);
+        const montagHeute = montagDerWoche(heute);
+        const montagMorgen = montagDerWoche(morgen);
+        const montagHeuteKey = localDateKey(montagHeute);
+        const montagMorgenKey = localDateKey(montagMorgen);
+
+        const heutePlanRes = await window.storage.get('essenapp:wochenplan:' + montagHeuteKey, true);
+        const heuteEintraege = heutePlanRes && heutePlanRes.value ? JSON.parse(heutePlanRes.value) : {};
+
+        let morgenEintraege = heuteEintraege;
+        if (montagMorgenKey !== montagHeuteKey) {
+          const morgenPlanRes = await window.storage.get('essenapp:wochenplan:' + montagMorgenKey, true);
+          morgenEintraege = morgenPlanRes && morgenPlanRes.value ? JSON.parse(morgenPlanRes.value) : {};
         }
+
+        const heuteGerichtId = heuteEintraege[heuteKey] || null;
+        const morgenGerichtId = morgenEintraege[morgenKey] || null;
+
+        let gerichte = [];
+        if (heuteGerichtId || morgenGerichtId) {
+          const gerichteRes = await window.storage.get('essenapp:gerichte', true);
+          gerichte = gerichteRes && gerichteRes.value ? JSON.parse(gerichteRes.value) : [];
+        }
+
+        const heuteGericht = heuteGerichtId ? gerichte.find((g) => g.id === heuteGerichtId) : null;
+        const morgenGericht = morgenGerichtId ? gerichte.find((g) => g.id === morgenGerichtId) : null;
+
+        document.getElementById('todaysMeal').textContent =
+          heuteGericht ? `${heuteGericht.emoji || ''} ${heuteGericht.name || ''}`.trim() : '—';
+        currentMealGerichtId = heuteGericht ? heuteGericht.id : null;
+
+        const tomorrowMealEl = document.getElementById('tomorrowsMeal');
+        if (tomorrowMealEl) {
+          tomorrowMealEl.textContent = morgenGericht
+            ? `Morgen: ${morgenGericht.emoji || ''} ${morgenGericht.name || ''}`.trim()
+            : '';
+        }
+      } catch (e) {
+        console.error('Wochenplan laden fehlgeschlagen:', e);
+        document.getElementById('todaysMeal').textContent = '—';
+        currentMealGerichtId = null;
+        const tomorrowMealEl = document.getElementById('tomorrowsMeal');
+        if (tomorrowMealEl) tomorrowMealEl.textContent = '';
       }
-      
+
       // Pinnwand (aus der Pinnwand-App: Speicherschlüssel "tasks", Felder title/status/category)
       const pinnwand = await window.storage.get('tasks', true);
       const pinnwandPreviewEl = document.getElementById('pinnwandPreview');
