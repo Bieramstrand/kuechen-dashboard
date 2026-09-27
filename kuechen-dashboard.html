@@ -407,8 +407,20 @@
       font-size: 0.75rem;
       color: #5B5340;
       line-height: 1.5;
-      max-height: 5.6em;
-      overflow: hidden;
+      max-height: 8.5em;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 4px;
+    }
+    .shopping-preview::-webkit-scrollbar {
+      width: 5px;
+    }
+    .shopping-preview::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .shopping-preview::-webkit-scrollbar-thumb {
+      background: #D9A441;
+      border-radius: 3px;
     }
     .shopping-preview .more {
       color: #8A8069;
@@ -1746,14 +1758,11 @@
           : [];
         document.getElementById('shoppingCount').textContent = open.length;
 
-        const preview = open.slice(-5).reverse(); // zuletzt hinzugefügte zuerst
+        const preview = open.slice().reverse(); // zuletzt hinzugefügte zuerst, jetzt alle (scrollbar)
         if (preview.length === 0) {
           previewEl.innerHTML = '';
         } else {
-          const rest = open.length - preview.length;
-          previewEl.innerHTML =
-            preview.map((i) => `• ${escapeHtml(i.n)}`).join('<br>') +
-            (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
+          previewEl.innerHTML = preview.map((i) => `• ${escapeHtml(i.n)}`).join('<br>');
         }
       } catch (e) {
         document.getElementById('shoppingCount').textContent = '0';
@@ -1829,15 +1838,12 @@
         const open = pinnwandData.filter((t) => t.status === 'offen');
         document.getElementById('householdTasks').textContent = open.length;
 
-        const preview = open.slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+        const preview = open.slice().sort((a, b) => b.createdAt - a.createdAt);
         if (preview.length === 0) {
           pinnwandPreviewEl.innerHTML = '';
         } else {
-          const rest = open.length - preview.length;
           const truncate = (text, max) => (text.length > max ? text.slice(0, max).trimEnd() + '…' : text);
-          pinnwandPreviewEl.innerHTML =
-            preview.map((t) => `• ${escapeHtml(truncate(t.title, 40))}`).join('<br>') +
-            (rest > 0 ? `<br><span class="more">+${rest} weitere</span>` : '');
+          pinnwandPreviewEl.innerHTML = preview.map((t) => `• ${escapeHtml(truncate(t.title, 40))}`).join('<br>');
         }
       } else {
         document.getElementById('householdTasks').textContent = '0';
