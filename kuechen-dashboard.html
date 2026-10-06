@@ -1465,6 +1465,7 @@
   // Kalender rendern
   let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "alle kommenden Termine" Ansicht)
   let currentMealGerichtId = null; // gerichtId des heutigen Gerichts, fuer die Rezept-Ansicht
+  let tomorrowMealGerichtId = null; // gerichtId des morgigen Gerichts, fuer die Rezept-Ansicht
 
   async function renderCalendar() {
     const now = new Date();
@@ -1820,16 +1821,19 @@
           heuteGericht ? `${heuteGericht.emoji || ''} ${heuteGericht.name || ''}`.trim() : '—';
         currentMealGerichtId = heuteGericht ? heuteGericht.id : null;
 
+        tomorrowMealGerichtId = morgenGericht ? morgenGericht.id : null;
         const tomorrowMealEl = document.getElementById('tomorrowsMeal');
         if (tomorrowMealEl) {
           tomorrowMealEl.textContent = morgenGericht
             ? `Morgen: ${morgenGericht.emoji || ''} ${morgenGericht.name || ''}`.trim()
             : '';
+          tomorrowMealEl.style.cursor = tomorrowMealGerichtId ? 'pointer' : 'default';
         }
       } catch (e) {
         console.error('Wochenplan laden fehlgeschlagen:', e);
         document.getElementById('todaysMeal').textContent = '—';
         currentMealGerichtId = null;
+        tomorrowMealGerichtId = null;
         const tomorrowMealEl = document.getElementById('tomorrowsMeal');
         if (tomorrowMealEl) tomorrowMealEl.textContent = '';
       }
@@ -1872,6 +1876,10 @@
           document.getElementById('todaysMeal').textContent = input || '—';
         }
       }
+    }
+
+    if (e.target.id === 'tomorrowsMeal' && tomorrowMealGerichtId) {
+      await showRecipeModal(tomorrowMealGerichtId);
     }
     
     if (e.target.closest('#pinnwandCard')) {
