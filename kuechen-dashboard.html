@@ -1805,28 +1805,41 @@
           morgenEintraege = morgenPlanRes && morgenPlanRes.value ? JSON.parse(morgenPlanRes.value) : {};
         }
 
-        const heuteGerichtId = heuteEintraege[heuteKey] || null;
-        const morgenGerichtId = morgenEintraege[morgenKey] || null;
+        // Ein Tag kann leer sein, eine einzelne Gericht-ID enthalten (alte Daten)
+        // oder eine Liste mehrerer Gericht-IDs (mehrere Gerichte pro Tag) - wie in der App selbst
+        const alsListe = (eintraege, key) => {
+          const wert = eintraege[key];
+          if (Array.isArray(wert)) return wert;
+          if (wert) return [wert];
+          return [];
+        };
+        const heuteIds = alsListe(heuteEintraege, heuteKey);
+        const morgenIds = alsListe(morgenEintraege, morgenKey);
 
         let gerichte = [];
-        if (heuteGerichtId || morgenGerichtId) {
+        if (heuteIds.length > 0 || morgenIds.length > 0) {
           const gerichteRes = await window.storage.get('essenapp:gerichte', true);
           gerichte = gerichteRes && gerichteRes.value ? JSON.parse(gerichteRes.value) : [];
         }
 
-        const heuteGericht = heuteGerichtId ? gerichte.find((g) => g.id === heuteGerichtId) : null;
-        const morgenGericht = morgenGerichtId ? gerichte.find((g) => g.id === morgenGerichtId) : null;
+        const aufloesen = (ids) => ids.map((id) => gerichte.find((g) => g.id === id)).filter(Boolean);
+        const formatiere = (liste) => {
+          if (liste.length === 0) return '';
+          const erstes = liste[0];
+          const weitere = liste.length - 1;
+          return `${erstes.emoji || ''} ${erstes.name || ''}`.trim() + (weitere > 0 ? ` · +${weitere} weitere` : '');
+        };
 
-        document.getElementById('todaysMeal').textContent =
-          heuteGericht ? `${heuteGericht.emoji || ''} ${heuteGericht.name || ''}`.trim() : '—';
-        currentMealGerichtId = heuteGericht ? heuteGericht.id : null;
+        const heuteGerichte = aufloesen(heuteIds);
+        const morgenGerichte = aufloesen(morgenIds);
 
-        tomorrowMealGerichtId = morgenGericht ? morgenGericht.id : null;
+        document.getElementById('todaysMeal').textContent = heuteGerichte.length > 0 ? formatiere(heuteGerichte) : '—';
+        currentMealGerichtId = heuteGerichte.length > 0 ? heuteGerichte[0].id : null;
+
+        tomorrowMealGerichtId = morgenGerichte.length > 0 ? morgenGerichte[0].id : null;
         const tomorrowMealEl = document.getElementById('tomorrowsMeal');
         if (tomorrowMealEl) {
-          tomorrowMealEl.textContent = morgenGericht
-            ? `Morgen: ${morgenGericht.emoji || ''} ${morgenGericht.name || ''}`.trim()
-            : '';
+          tomorrowMealEl.textContent = morgenGerichte.length > 0 ? `Morgen: ${formatiere(morgenGerichte)}` : '';
           tomorrowMealEl.style.cursor = tomorrowMealGerichtId ? 'pointer' : 'default';
         }
       } catch (e) {
