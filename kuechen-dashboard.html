@@ -399,6 +399,22 @@
       user-select: none;
       margin-top: 2px;
     }
+    #todaysMeal {
+      max-height: 6.8rem;
+      overflow-y: auto;
+    }
+    .meal-line {
+      cursor: pointer;
+      line-height: 1.2;
+    }
+    .meal-line-small {
+      font-size: 1.05rem;
+      margin-top: 3px;
+    }
+    .meal-link {
+      cursor: pointer;
+      font-weight: 600;
+    }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -1834,24 +1850,32 @@
         }
 
         const aufloesen = (ids) => ids.map((id) => gerichte.find((g) => g.id === id)).filter(Boolean);
-        const formatiere = (liste) => {
-          if (liste.length === 0) return '';
-          const erstes = liste[0];
-          const weitere = liste.length - 1;
-          return `${erstes.emoji || ''} ${erstes.name || ''}`.trim() + (weitere > 0 ? ` · +${weitere} weitere` : '');
-        };
+        const gerichtLabel = (g) => `${g.emoji || ''} ${g.name || ''}`.trim();
 
         const heuteGerichte = aufloesen(heuteIds);
         const morgenGerichte = aufloesen(morgenIds);
 
-        document.getElementById('todaysMeal').textContent = heuteGerichte.length > 0 ? formatiere(heuteGerichte) : '—';
+        // Heute: jedes Gericht in einer eigenen, antippbaren Zeile (bei mehreren etwas kleiner)
+        const todayEl = document.getElementById('todaysMeal');
+        if (heuteGerichte.length === 0) {
+          todayEl.textContent = '—';
+        } else {
+          const klein = heuteGerichte.length > 1;
+          todayEl.innerHTML = heuteGerichte.map((g) =>
+            `<div class="meal-line${klein ? ' meal-line-small' : ''}" data-gericht-id="${escapeHtml(g.id)}">${escapeHtml(gerichtLabel(g))}</div>`
+          ).join('');
+        }
         currentMealGerichtId = heuteGerichte.length > 0 ? heuteGerichte[0].id : null;
 
+        // Morgen: alle Gerichte in einer Zeile, einzeln antippbar
         tomorrowMealGerichtId = morgenGerichte.length > 0 ? morgenGerichte[0].id : null;
         const tomorrowMealEl = document.getElementById('tomorrowsMeal');
         if (tomorrowMealEl) {
-          tomorrowMealEl.textContent = morgenGerichte.length > 0 ? `Morgen: ${formatiere(morgenGerichte)}` : '';
-          tomorrowMealEl.style.cursor = tomorrowMealGerichtId ? 'pointer' : 'default';
+          tomorrowMealEl.innerHTML = morgenGerichte.length > 0
+            ? 'Morgen: ' + morgenGerichte.map((g) =>
+                `<span class="meal-link" data-gericht-id="${escapeHtml(g.id)}">${escapeHtml(gerichtLabel(g))}</span>`
+              ).join(' · ')
+            : '';
         }
       } catch (e) {
         console.error('Wochenplan laden fehlgeschlagen:', e);
@@ -1889,6 +1913,13 @@
 
   // Click Handler für Meal, Tasks und HVV
   document.addEventListener('click', async (e) => {
+    // Antippen eines einzelnen Gerichts (heute oder morgen) oeffnet genau dessen Rezept
+    const gerichtEl = e.target.closest ? e.target.closest('[data-gericht-id]') : null;
+    if (gerichtEl) {
+      await showRecipeModal(gerichtEl.dataset.gerichtId);
+      return;
+    }
+
     if (e.target.id === 'todaysMeal') {
       if (currentMealGerichtId) {
         await showRecipeModal(currentMealGerichtId);
