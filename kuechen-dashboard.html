@@ -1479,6 +1479,8 @@
     await window.storage.set('household:calendar-ics-events', JSON.stringify(events), true);
     await window.storage.set('household:calendar-ics-imported-at', Date.now().toString(), true);
     await renderCalendar();
+    await syncCalendarTasks();
+    await updateActionsOverview();
 
     const recurringCount = rawEvents.filter((ev) => ev.rrule).length;
     alert(
@@ -2019,12 +2021,83 @@
     }
   });
 
+  // Kalender → Pinnwand: Termine, deren Titel mit "Pinnwand |" (oder "Pinnwand:") beginnt, werden ab dem Mittwoch vor dem Termin
+  // automatisch als Aufgabe in der Pinnwand angelegt (jeder Termin nur einmal)
+  const CAL_TASK_KEYWORD = /^\s*pinnwand\s*[|:]\s*/i;
+
+  function wednesdayBefore(date) {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    let diff = (d.getDay() - 3 + 7) % 7; // 3 = Mittwoch
+    if (diff === 0) diff = 7; // Termin am Mittwoch: Mittwoch der Woche davor
+    d.setDate(d.getDate() - diff);
+    return d;
+  }
+
+  async function syncCalendarTasks() {
+    try {
+      const icsData = await window.storage.get('household:calendar-ics-events', true);
+      if (!icsData || !icsData.value) return;
+      const events = JSON.parse(icsData.value);
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      let created = [];
+      try {
+        const c = await window.storage.get('household:calendar-tasks-created', true);
+        if (c && c.value) created = JSON.parse(c.value);
+      } catch (e) {}
+
+      const due = [];
+      events.forEach((ev) => {
+        if (!ev.summary || !CAL_TASK_KEYWORD.test(ev.summary)) return;
+        const start = new Date(ev.dtstart);
+        if (isNaN(start)) return;
+        const eventDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        if (eventDay < today) return; // Termin schon vorbei
+        if (today < wednesdayBefore(eventDay)) return; // noch nicht Mittwoch davor
+        const key = localDateKey(eventDay) + '|' + ev.summary.trim();
+        if (created.includes(key) || due.some((d) => d.key === key)) return;
+        due.push({ key, eventDay, title: ev.summary.replace(CAL_TASK_KEYWORD, '').trim() });
+      });
+
+      if (due.length === 0) return;
+
+      let tasksData = [];
+      const existing = await window.storage.get('tasks', true);
+      if (existing && existing.value) tasksData = JSON.parse(existing.value);
+
+      due.forEach((d) => {
+        tasksData.push({
+          id: 't' + Date.now() + Math.random().toString(36).slice(2, 7),
+          title: d.title,
+          category: 'Sonstiges',
+          status: 'offen',
+          createdAt: Date.now(),
+          dueDate: localDateKey(d.eventDay),
+          source: 'kalender',
+        });
+        created.push(d.key);
+      });
+
+      // Merkliste schlank halten: Einträge älter als 60 Tage entfernen
+      const cutoff = localDateKey(addDays(today, -60));
+      created = created.filter((k) => k.split('|')[0] >= cutoff);
+
+      await window.storage.set('tasks', JSON.stringify(tasksData), true);
+      await window.storage.set('household:calendar-tasks-created', JSON.stringify(created), true);
+    } catch (e) {
+      console.error('Kalender Aufgaben Sync fehlgeschlagen:', e);
+    }
+  }
+
   // Initialisierung
   (async function init() {
     initRainViewer();
     await loadTemperature();
     await renderCalendar();
     await loadHVVData();
+    await syncCalendarTasks();
     await updateActionsOverview();
     
     // Auto-refresh alle 5 Minuten
@@ -2032,6 +2105,7 @@
       await loadTemperature();
       await renderCalendar();
       await loadHVVData();
+      await syncCalendarTasks();
       await updateActionsOverview();
     }, 5 * 60 * 1000);
   })();
