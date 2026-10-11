@@ -415,6 +415,28 @@
       cursor: pointer;
       font-weight: 600;
     }
+    .kita-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #3C6E8F;
+      color: #FBF8F1;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(42,36,23,0.25);
+    }
+    .kita-btn img {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: block;
+    }
+    .kita-btn:active { background: #2E5A75; }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -732,7 +754,13 @@
 
     <!-- Nächste Aktionen -->
     <div class="panel" id="actionsPanel">
-      <h2 class="panel-title">Übersicht diese Woche</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+        <h2 class="panel-title" style="margin:0;">Übersicht diese Woche</h2>
+        <a href="https://www.taskcards.de/#/board/242a6c8d-0853-45d4-a16e-9773175836ae/view?token=8651b56c-95aa-40e3-8c76-9dda67447feb" target="_blank" rel="noopener" class="kita-btn">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAD/ElEQVR4nO3dwWqTaRTH4XaYa3AvAy4HZzULlwregYheiCtBcDW3ISjiHQh6Aa5mmKUwzFqvYhaBkPmS/9s0pjnnTZ9n1SaLHt7+epIvpO3ltzcPLmCXn6oHoC9xEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6uXqAw/3597+bn/72692qSbZ1nm1/s26OxenvvKVK59muZco40ll3+B50nu26Lqf74y2bp/z4j39WH3x88cv6xsId3nm2A0y5OVbWp7/4uIPOs+1v4ji4aV2uVo74kNz50X3/2To8ANU/5/iR7+XOx/UmjjJbbSLFcXT+KW+isI/K5xzK2EfhKZXFoYz9VZ1VTRzKuK6SE3MpS1QQh7VxmNOfm81BJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEFU8EtN8/56YLnvbx+d8svZHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB1GXPxg39urd6/99+uxl1SS3ygSbY1HGzlu4Cd03R+rg1bvX4/3x15fPNzPRMd3//WH1CCOtN8d4QwzunaKMi/Zzto7jMM1PfKHztGcYB8ciDqIzjKP5s7yFztO2jmN8PTK4t/OJb2o+Z/tL2Wcvd16VXPk6WPNzn0LrzbGy3YFXSE+j++ZYUUOJCTYHVcRBJA4icRCJg0gcROIgEgeROIjEQTTHy+dfnzzd/PTeh/dVk9wqE2yORRk7b+EmdN8cqYOvT56O90fn92auNX9fQevNMd4Qg3unKOOi/Zyt4zhM8xNf6DztGcbBsYiD6AzjaP4sb6HztK3jGF+PDO7tfOKbms/Z/VL23of3O69KrnwdrPm5T6H15ljZ7sArpKfRfXOsqKHEBJuDKuIgEgeROIjEQSQOInEQiYNIHETiIJrj5fPF/1O98/xT1SS3ygSbY/s/7Z74f+/eWt03R+rg+9tH4/3R+b2Za83fV9B6c4w3xODeKcq4aD9n6zgO0/zEFzpPe4ZxcCziIDrDOJo/y1voPG3rOMbXI4N7O5/4puZzdr+UvfP8086rkitfB2t+7lNovTlWtjvwCulpdN8cK2ooMcHmoIo4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQFcTht04Oc/pzszmIauKwPK6r5MTKNoc+9ld1VpUPK/rYR+EpFT/n0MdY7flcfnvzoPDLr3mX6EKHH5sucdCQS1kicRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgfRf1XO9JFY3E8qAAAAAElFTkSuQmCC" alt="" />
+          <span>Kitaplan</span>
+        </a>
+      </div>
       <div class="actions-grid">
         <div class="action-card ocean" id="shoppingCard" style="cursor:pointer;">
           <span class="action-title" style="display:flex; align-items:center; gap:6px;">
