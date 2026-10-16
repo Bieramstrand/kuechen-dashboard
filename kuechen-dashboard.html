@@ -578,7 +578,7 @@
       box-sizing: border-box;
     }
     .modal-input:focus { border-color: #3C6E8F; }
-    .modal-overlay.top { align-items: flex-start; padding-top: 4vh; }
+    #modalOverlay .modal-card { max-height: calc(100% - 48px); overflow-y: auto; }
     .modal-suggestions {
       margin-top: 8px;
       flex-direction: column;
@@ -995,7 +995,6 @@
       input.value = '';
       sugBox.innerHTML = '';
       sugBox.style.display = 'none';
-      overlay.classList.toggle('top', !!suggest);
       if (suggest) {
         input.setAttribute('autocomplete', 'off');
         input.setAttribute('autocorrect', 'off');
@@ -1004,7 +1003,27 @@
         input.removeAttribute('autocorrect');
         input.removeAttribute('spellcheck');
       }
+      // Das Fenster wird im sichtbaren Bereich zentriert. Geht die iPad Tastatur auf, schrumpft der
+      // sichtbare Bereich (visualViewport), das Fenster bleibt dann mittig darueber und nichts wird verdeckt.
+      const vv = window.visualViewport;
+      function fitToVisibleArea() {
+        if (!vv) return;
+        overlay.style.top = vv.offsetTop + 'px';
+        overlay.style.height = vv.height + 'px';
+        overlay.style.bottom = 'auto';
+      }
+      function resetVisibleArea() {
+        overlay.style.top = '';
+        overlay.style.height = '';
+        overlay.style.bottom = '';
+      }
+
       overlay.classList.remove('hidden');
+      fitToVisibleArea();
+      if (vv) {
+        vv.addEventListener('resize', fitToVisibleArea);
+        vv.addEventListener('scroll', fitToVisibleArea);
+      }
       setTimeout(() => input.focus(), 50);
 
       function splitInput() {
@@ -1055,7 +1074,11 @@
       function cleanup(result) {
         closed = true;
         overlay.classList.add('hidden');
-        overlay.classList.remove('top');
+        if (vv) {
+          vv.removeEventListener('resize', fitToVisibleArea);
+          vv.removeEventListener('scroll', fitToVisibleArea);
+        }
+        resetVisibleArea();
         sugBox.style.display = 'none';
         sugBox.innerHTML = '';
         sugBox.removeEventListener('mousedown', keepFocus);
