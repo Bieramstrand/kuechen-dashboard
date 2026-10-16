@@ -437,6 +437,42 @@
       display: block;
     }
     .kita-btn:active { background: #2E5A75; }
+    .shopping-lists {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      max-height: 100px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .shop-chip {
+      background: #FBF8F1;
+      border: 1px solid #D9A441;
+      border-radius: 8px;
+      padding: 5px 4px 4px;
+      text-align: center;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .shop-chip:active { background: #E4DCC5; }
+    .shop-chip-count {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #3C6E8F;
+      line-height: 1.15;
+    }
+    .shop-chip-name {
+      display: block;
+      font-size: 0.64rem;
+      color: #5B5340;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .shop-chip-empty { border-color: #E4DCC5; opacity: 0.6; }
+    .shop-chip-empty .shop-chip-count { color: #9B9280; }
+    .shop-empty { font-size: 0.75rem; color: #8A8069; }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -770,8 +806,7 @@
             </a>
             Einkaufsliste
           </span>
-          <span class="action-value" id="shoppingCount">0</span>
-          <div id="shoppingPreview" class="shopping-preview"></div>
+          <div id="shoppingLists" class="shopping-lists"></div>
         </div>
         <div class="action-card moss" id="pinnwandCard" style="cursor:pointer;">
           <span class="action-title" style="display:flex; align-items:center; gap:6px;">
@@ -1526,6 +1561,7 @@
   // Kalender rendern
   let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "alle kommenden Termine" Ansicht)
   let currentMealGerichtId = null; // gerichtId des heutigen Gerichts, fuer die Rezept-Ansicht
+  let shoppingListsById = {}; // alle Listen der Einkaufszettel App, fuer das Antippen einer Liste
   let tomorrowMealGerichtId = null; // gerichtId des morgigen Gerichts, fuer die Rezept-Ansicht
 
   async function renderCalendar() {
@@ -1809,30 +1845,36 @@
   // Aktions-Übersicht aktualisieren
   async function updateActionsOverview() {
     try {
-      // Einkaufsliste (nur Artikel aus der Liste "Einkaufsliste", nicht aus anderen Listen wie Rewe/Edeka)
-      const previewEl = document.getElementById('shoppingPreview');
+      // Einkaufslisten: jede Liste der Einkaufszettel App (Edeka, Lidl, DM, ...) mit Anzahl offener Artikel
+      const shopListsEl = document.getElementById('shoppingLists');
       try {
         const listsRes = await window.storage.get('shoppingapp:lists', true);
         const lists = listsRes && listsRes.value ? JSON.parse(listsRes.value) : [];
-        const einkaufsliste = lists.find((l) => l.name === 'Einkaufsliste');
-
         const itemsRes = await window.storage.get('shoppingapp:items', true);
         const shopData = itemsRes && itemsRes.value ? JSON.parse(itemsRes.value) : [];
 
-        const open = einkaufsliste
-          ? shopData.filter((i) => !i.checked && i.listId === einkaufsliste.id)
-          : [];
-        document.getElementById('shoppingCount').textContent = open.length;
+        shoppingListsById = {};
+        lists.forEach((l) => { shoppingListsById[l.id] = l; });
 
-        const preview = open.slice().reverse(); // zuletzt hinzugefügte zuerst, jetzt alle (scrollbar)
-        if (preview.length === 0) {
-          previewEl.innerHTML = '';
+        if (lists.length === 0) {
+          shopListsEl.innerHTML = '<div class="shop-empty">Noch keine Listen</div>';
         } else {
-          previewEl.innerHTML = preview.map((i) => `• ${escapeHtml(i.n)}`).join('<br>');
+          const counts = {};
+          shopData.forEach((i) => {
+            if (!i.checked) counts[i.listId] = (counts[i.listId] || 0) + 1;
+          });
+          shopListsEl.innerHTML = lists.map((l) => {
+            const n = counts[l.id] || 0;
+            const idAttr = escapeHtml(String(l.id)).replace(/"/g, '&quot;');
+            const nameAttr = escapeHtml(String(l.name)).replace(/"/g, '&quot;');
+            return `<div class="shop-chip${n === 0 ? ' shop-chip-empty' : ''}" data-shop-list-id="${idAttr}" title="${nameAttr}">` +
+              `<span class="shop-chip-count">${n}</span>` +
+              `<span class="shop-chip-name">${escapeHtml(String(l.name))}</span></div>`;
+          }).join('');
         }
       } catch (e) {
-        document.getElementById('shoppingCount').textContent = '0';
-        previewEl.innerHTML = '';
+        console.error('Einkaufslisten laden fehlgeschlagen:', e);
+        shopListsEl.innerHTML = '';
       }
       
       // Was essen wir heute/morgen – direkt aus dem Wochenplan der "Was essen wir heute?"-App
@@ -1945,6 +1987,36 @@
     }
   }
 
+  // Artikel in eine bestimmte Einkaufsliste eintragen (doppelte offene Artikel werden uebersprungen)
+  async function addShoppingItems(names, targetListId) {
+    let items = [];
+    try {
+      const existingItems = await window.storage.get('shoppingapp:items', true);
+      if (existingItems) items = JSON.parse(existingItems.value);
+    } catch (e) {}
+
+    names.forEach((name) => {
+      const already = items.find(
+        (it) => it.listId === targetListId && !it.checked && it.n.toLowerCase() === name.toLowerCase()
+      );
+      if (!already) {
+        items.push({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+          listId: targetListId,
+          n: name,
+          c: 'sonstiges',
+          i: '📝',
+          checked: false,
+          qty: 1,
+          addedVia: 'dashboard',
+        });
+      }
+    });
+
+    await window.storage.set('shoppingapp:items', JSON.stringify(items), true);
+    await updateActionsOverview();
+  }
+
   // Click Handler für Meal, Tasks und HVV
   document.addEventListener('click', async (e) => {
     // Antippen eines einzelnen Gerichts (heute oder morgen) oeffnet genau dessen Rezept
@@ -1993,6 +2065,20 @@
       }
     }
 
+    // Antippen einer einzelnen Liste (z.B. Edeka): direkt dort eintragen
+    const chipEl = e.target.closest ? e.target.closest('[data-shop-list-id]') : null;
+    if (chipEl) {
+      const list = shoppingListsById[chipEl.dataset.shopListId];
+      if (list) {
+        const chipInput = await customPrompt('Was soll auf die Liste ' + list.name + '?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"');
+        if (chipInput !== null && chipInput.trim()) {
+          const chipNames = chipInput.split(',').map((n) => n.trim()).filter(Boolean);
+          await addShoppingItems(chipNames, list.id);
+        }
+      }
+      return;
+    }
+
     if (e.target.closest('#shoppingCard')) {
       const itemInput = await customPrompt('Was soll auf die Einkaufsliste?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"');
       if (itemInput !== null && itemInput.trim()) {
@@ -2021,34 +2107,7 @@
         // Nutzer waehlen lassen, in welche Liste eingetragen werden soll
         const chosenList = await pickList(lists);
         if (!chosenList) return; // abgebrochen
-        const targetListId = chosenList.id;
-
-        let items = [];
-        try {
-          const existingItems = await window.storage.get('shoppingapp:items', true);
-          if (existingItems) items = JSON.parse(existingItems.value);
-        } catch (e) {}
-
-        names.forEach((name) => {
-          const already = items.find(
-            (it) => it.listId === targetListId && !it.checked && it.n.toLowerCase() === name.toLowerCase()
-          );
-          if (!already) {
-            items.push({
-              id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-              listId: targetListId,
-              n: name,
-              c: 'sonstiges',
-              i: '📝',
-              checked: false,
-              qty: 1,
-              addedVia: 'dashboard',
-            });
-          }
-        });
-
-        await window.storage.set('shoppingapp:items', JSON.stringify(items), true);
-        await updateActionsOverview();
+        await addShoppingItems(names, chosenList.id);
       }
     }
   });
