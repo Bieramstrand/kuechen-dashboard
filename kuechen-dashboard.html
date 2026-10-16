@@ -473,6 +473,14 @@
     .shop-chip-empty { border-color: #E4DCC5; opacity: 0.6; }
     .shop-chip-empty .shop-chip-count { color: #9B9280; }
     .shop-empty { font-size: 0.75rem; color: #8A8069; }
+    .pinnwand-count {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #4F6B44;
+      line-height: 1;
+      user-select: none;
+    }
+    #pinnwandPreview { max-height: 7.2em; }
     .action-card.moss { border-left: 5px solid #4F6B44; }
     .action-card.moss .action-value { color: #4F6B44; }
     .action-card.ocean { border-left: 5px solid #3C6E8F; }
@@ -570,6 +578,26 @@
       box-sizing: border-box;
     }
     .modal-input:focus { border-color: #3C6E8F; }
+    .modal-overlay.top { align-items: flex-start; padding-top: 4vh; }
+    .modal-suggestions {
+      margin-top: 8px;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .modal-suggestion {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #F1ECDD;
+      font-size: 0.95rem;
+      color: #2E2A22;
+      cursor: pointer;
+    }
+    .modal-suggestion:active { background: #E4DCC5; }
+    .modal-suggestion b { font-weight: 700; }
+
     .modal-actions {
       display: flex;
       justify-content: flex-end;
@@ -809,14 +837,16 @@
           <div id="shoppingLists" class="shopping-lists"></div>
         </div>
         <div class="action-card moss" id="pinnwandCard" style="cursor:pointer;">
-          <span class="action-title" style="display:flex; align-items:center; gap:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+          <span class="action-title" style="display:flex; align-items:center; gap:6px; margin-bottom:0;">
             <a href="https://diepinnwand.netlify.app" target="_blank" rel="noopener"
                onclick="event.stopPropagation()" title="Pinnwand App öffnen" style="line-height:0;">
               <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADvUlEQVR4nO3dMW4bRwCG0ZGRJqUbq1Uv3cFN4MbQCazGQC6QJkBOEMCNLxDATXwEN0aOEfVu7cZl2hQLCAzJf8ldUZzJzHsVuaKIwe6n2R0sSF28vLstsM+z2gOgXeIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIg+qH2AAb16z/fdze++/H5+UcyQxzntjeLzR+1k4jTylnNlLHoNedh5jiTRYe8kSnEzEEkjnNYd6aofn4Rx5N7zDGu24drjpruv3ydHlxfXdYdyV5mjqeV/vTvv3x9KGP36THvcAbiIBJHBWmSSNtrEQeROIiaW6389ceftYdwSp/fvN7deH11ufcM0tqapa2Zo7My/u8aiqPLMl59/LR3+/XV5eY8sfV0U8U7LK2cVros46DWziNbmpg5+i4jTR7HqHtjtok4ureuD7fsaZc4zuTVx0/Hzx+LXvx0Wrkg3ev9729rD+HUbl5c//1t/iUtZDFpOo4u3d+8KKXsTaSdLCbiqGNKZPLLbx8qjmSGaw4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4HqXZTxWchDjWm8rouA9xrLTZRK99iGON3Rq67EMcJ9NfH+JYLEXQ33cCiGOZccoo4lhkqDKKOI7X3yXFQeI4ykwZvU4bRRyP1HEZRRzHGO1S44E4Dhi2jCKOeSOXUQaJY91CY8DlyZb+41h373TM5cmWzuNYd+9UGZOe4zj5vdOhyigdx5E6ONjH4Behm7qNY+ZYzvShjE3dxlGW96GMLT3HUZb0YeG6q/M4ynF9WJ7s1X8cZe31x/wvjmCIOMqqPgYvo4wTR1l4sJVRhoqjHH3IlTEZK47iwC8xXBzlUB/qeTBiHCUXoIxNg8ZR/tvB9FgZW4b+75C7fbBp3JmDg8RBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxETX80wReq1GXmIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgaiKOn36+qz2E5rSwT5qIo7SxL9rRyN5oJY7SzB6prp390FAcpaX9UktTe+Di5d1t7THQqLZmDpoiDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6Fw8N3Lq2B7ENAAAAAElFTkSuQmCC" alt="" style="width:20px; height:20px; border-radius:5px;" />
             </a>
             Pinnwand
           </span>
-          <span class="action-value" id="householdTasks">0</span>
+          <span class="pinnwand-count" id="householdTasks" title="Offene Aufgaben">0</span>
+          </div>
           <div id="pinnwandPreview" class="shopping-preview"></div>
         </div>
         <div class="action-card ocean">
@@ -860,6 +890,7 @@
       <p class="modal-title" id="modalTitle">Titel</p>
       <p class="modal-hint" id="modalHint"></p>
       <input type="text" class="modal-input" id="modalInput" />
+      <div class="modal-suggestions" id="modalSuggestions" style="display:none;"></div>
       <div class="modal-actions">
         <button class="modal-btn cancel" id="modalCancelBtn">Abbrechen</button>
         <button class="modal-btn ok" id="modalOkBtn">OK</button>
@@ -948,18 +979,88 @@
   const HAFAS_BASE = 'https://v5.bvg.transport.rest';
 
   // Eigenes Eingabefenster statt Browser-prompt() – gleiche Nutzung: await customPrompt(titel, hinweis)
-  function customPrompt(title, hint) {
+  // Eingabefenster. Optional: opts.suggest(token, bereitsGetippt) liefert Vorschlaege [{name, icon}],
+  // opts.ready ist ein Promise, nach dessen Erfuellung die Vorschlaege neu berechnet werden.
+  // Mehrere Artikel werden mit Komma getrennt, Vorschlaege beziehen sich auf den Teil nach dem letzten Komma.
+  function customPrompt(title, hint, opts) {
     return new Promise((resolve) => {
       const overlay = document.getElementById('modalOverlay');
       const input = document.getElementById('modalInput');
+      const sugBox = document.getElementById('modalSuggestions');
+      const suggest = opts && opts.suggest;
+      let closed = false;
+
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalHint').textContent = hint || '';
       input.value = '';
+      sugBox.innerHTML = '';
+      sugBox.style.display = 'none';
+      overlay.classList.toggle('top', !!suggest);
+      if (suggest) {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('spellcheck', 'false');
+      } else {
+        input.removeAttribute('autocorrect');
+        input.removeAttribute('spellcheck');
+      }
       overlay.classList.remove('hidden');
       setTimeout(() => input.focus(), 50);
 
+      function splitInput() {
+        const v = input.value;
+        const idx = v.lastIndexOf(',');
+        return {
+          head: v.slice(0, idx + 1),
+          token: v.slice(idx + 1).trim(),
+          prior: v.slice(0, idx + 1).split(',').map((s) => s.trim()).filter(Boolean),
+        };
+      }
+      function renderSuggestions() {
+        if (!suggest || closed) return;
+        const { token, prior } = splitInput();
+        const matches = token ? suggest(token, prior) : [];
+        if (matches.length === 0) {
+          sugBox.style.display = 'none';
+          sugBox.innerHTML = '';
+          return;
+        }
+        const q = token.toLowerCase();
+        sugBox.innerHTML = matches.map((m) => {
+          const pos = m.name.toLowerCase().indexOf(q);
+          const label = pos >= 0
+            ? escapeHtml(m.name.slice(0, pos)) + '<b>' + escapeHtml(m.name.slice(pos, pos + q.length)) + '</b>' + escapeHtml(m.name.slice(pos + q.length))
+            : escapeHtml(m.name);
+          return `<div class="modal-suggestion" data-name="${encodeURIComponent(m.name)}"><span>${m.icon || ''}</span><span>${label}</span></div>`;
+        }).join('');
+        sugBox.style.display = 'flex';
+      }
+      function onSuggestionClick(e) {
+        const el = e.target.closest('.modal-suggestion');
+        if (!el) return;
+        const name = decodeURIComponent(el.dataset.name);
+        const { head } = splitInput();
+        input.value = (head ? head + ' ' : '') + name + ', ';
+        renderSuggestions();
+        input.focus();
+      }
+      // Tastatur nicht verschwinden lassen, wenn ein Vorschlag angetippt wird
+      function keepFocus(e) { e.preventDefault(); }
+
+      sugBox.addEventListener('mousedown', keepFocus);
+      sugBox.addEventListener('click', onSuggestionClick);
+      input.addEventListener('input', renderSuggestions);
+      if (opts && opts.ready) opts.ready.then(renderSuggestions);
+
       function cleanup(result) {
+        closed = true;
         overlay.classList.add('hidden');
+        overlay.classList.remove('top');
+        sugBox.style.display = 'none';
+        sugBox.innerHTML = '';
+        sugBox.removeEventListener('mousedown', keepFocus);
+        sugBox.removeEventListener('click', onSuggestionClick);
+        input.removeEventListener('input', renderSuggestions);
         okBtn.removeEventListener('click', onOk);
         cancelBtn.removeEventListener('click', onCancel);
         input.removeEventListener('keydown', onKeydown);
@@ -1561,6 +1662,11 @@
   // Kalender rendern
   let calendarSelectedDate = null; // yyyy-mm-dd oder null (= "alle kommenden Termine" Ansicht)
   let currentMealGerichtId = null; // gerichtId des heutigen Gerichts, fuer die Rezept-Ansicht
+  // Listen, die auf dem Dashboard nicht angezeigt werden sollen (Saucen, Gewuerze)
+  function isHiddenShopList(list) {
+    const n = String((list && list.name) || '').toLowerCase();
+    return n.includes('sauce') || n.includes('gewürz') || n.includes('gewuerz');
+  }
   let shoppingListsById = {}; // alle Listen der Einkaufszettel App, fuer das Antippen einer Liste
   let tomorrowMealGerichtId = null; // gerichtId des morgigen Gerichts, fuer die Rezept-Ansicht
 
@@ -1849,7 +1955,7 @@
       const shopListsEl = document.getElementById('shoppingLists');
       try {
         const listsRes = await window.storage.get('shoppingapp:lists', true);
-        const lists = listsRes && listsRes.value ? JSON.parse(listsRes.value) : [];
+        const lists = (listsRes && listsRes.value ? JSON.parse(listsRes.value) : []).filter((l) => !isHiddenShopList(l));
         const itemsRes = await window.storage.get('shoppingapp:items', true);
         const shopData = itemsRes && itemsRes.value ? JSON.parse(itemsRes.value) : [];
 
@@ -1987,33 +2093,117 @@
     }
   }
 
-  // Artikel in eine bestimmte Einkaufsliste eintragen (doppelte offene Artikel werden uebersprungen)
-  async function addShoppingItems(names, targetListId) {
-    let items = [];
+  // SHOP_AUTOCOMPLETE_START
+  // Artikelkatalog der Einkaufszettel App: [Name, Kategorie, Symbol]
+  const SHOP_CATALOG = [["Äpfel","obst","🍎"],["Bananen","obst","🍌"],["Orangen","obst","🍊"],["Zitronen","obst","🍋"],["Trauben","obst","🍇"],["Erdbeeren","obst","🍓"],["Blaubeeren","obst","🫐"],["Birnen","obst","🍐"],["Pfirsiche","obst","🍑"],["Kiwi","obst","🥝"],["Avocado","obst","🥑"],["Tomaten","obst","🍅"],["Gurken","obst","🥒"],["Paprika","obst","🫑"],["Zwiebeln","obst","🧅"],["Knoblauch","obst","🧄"],["Kartoffeln","obst","🥔"],["Karotten","obst","🥕"],["Salat","obst","🥬"],["Brokkoli","obst","🥦"],["Blumenkohl","obst","🥦"],["Zucchini","obst","🥒"],["Champignons","obst","🍄"],["Spinat","obst","🥬"],["Lauch","obst","🥬"],["Sellerie","obst","🥬"],["Radieschen","obst","🌱"],["Rote Bete","obst","🥕"],["Süßkartoffeln","obst","🍠"],["Mais","obst","🌽"],["Milch","milch","🥛"],["Buttermilch","milch","🥛"],["Sahne","milch","🥛"],["Schlagsahne","milch","🥛"],["Joghurt","milch","🥣"],["Quark","milch","🥣"],["Butter","milch","🧈"],["Margarine","milch","🧈"],["Käse","milch","🧀"],["Gouda","milch","🧀"],["Emmentaler","milch","🧀"],["Mozzarella","milch","🧀"],["Feta","milch","🧀"],["Frischkäse","milch","🧀"],["Parmesan","milch","🧀"],["Eier","milch","🥚"],["Kondensmilch","milch","🥫"],["Hafermilch","milch","🥛"],["Mandelmilch","milch","🥛"],["Sojajoghurt","milch","🥣"],["Brot","brot","🍞"],["Toastbrot","brot","🍞"],["Brötchen","brot","🥖"],["Baguette","brot","🥖"],["Vollkornbrot","brot","🍞"],["Croissants","brot","🥐"],["Knäckebrot","brot","🍘"],["Tortillas","brot","🫓"],["Mehl","brot","🌾"],["Zucker","brot","🧂"],["Hefe","brot","🍞"],["Backpulver","brot","🧁"],["Vanillezucker","brot","🧁"],["Haferflocken","brot","🌾"],["Müsli","brot","🥣"],["Cornflakes","brot","🥣"],["Hähnchenbrust","fleisch","🍗"],["Hackfleisch","fleisch","🥩"],["Rindersteak","fleisch","🥩"],["Schweinefilet","fleisch","🥩"],["Speck","fleisch","🥓"],["Wurst","fleisch","🌭"],["Salami","fleisch","🍖"],["Schinken","fleisch","🍖"],["Lachs","fleisch","🐟"],["Thunfisch","fleisch","🐟"],["Garnelen","fleisch","🍤"],["Fischstäbchen","fleisch","🐟"],["Bratwurst","fleisch","🌭"],["Leberkäse","fleisch","🍖"],["Nudeln","vorrat","🍝"],["Reis","vorrat","🍚"],["Linsen","vorrat","🫘"],["Kichererbsen","vorrat","🫘"],["Bohnen","vorrat","🫘"],["Passierte Tomaten","vorrat","🍅"],["Kokosmilch","vorrat","🥥"],["Brühe","vorrat","🍲"],["Öl","vorrat","🛢️"],["Olivenöl","vorrat","🫒"],["Essig","vorrat","🧴"],["Honig","vorrat","🍯"],["Marmelade","vorrat","🍓"],["Nutella","vorrat","🍫"],["Erdnussbutter","vorrat","🥜"],["Nüsse","vorrat","🥜"],["Mandeln","vorrat","🌰"],["Rosinen","vorrat","🍇"],["Konserven","vorrat","🥫"],["Suppe","vorrat","🍲"],["Tiefkühlgemüse","tiefkuehl","❄️"],["Tiefkühlpizza","tiefkuehl","🍕"],["Eis","tiefkuehl","🍦"],["Pommes","tiefkuehl","🍟"],["Tiefkühlbeeren","tiefkuehl","🫐"],["Tiefkühlkräuter","tiefkuehl","🌿"],["Tiefkühlfisch","tiefkuehl","🐟"],["Wasser","getraenke","💧"],["Mineralwasser","getraenke","🫧"],["Apfelsaft","getraenke","🧃"],["Orangensaft","getraenke","🧃"],["Cola","getraenke","🥤"],["Limonade","getraenke","🥤"],["Bier","getraenke","🍺"],["Wein","getraenke","🍷"],["Kaffee","getraenke","☕"],["Tee","getraenke","🍵"],["Energydrink","getraenke","⚡"],["Schokolade","suess","🍫"],["Kekse","suess","🍪"],["Chips","suess","🥔"],["Gummibärchen","suess","🐻"],["Popcorn","suess","🍿"],["Salzstangen","suess","🥨"],["Müsliriegel","suess","🍫"],["Eis am Stiel","suess","🍦"],["Salz","gewuerz","🧂"],["Pfeffer","gewuerz","🧂"],["Paprikapulver","gewuerz","🌶️"],["Curry","gewuerz","🍛"],["Zimt","gewuerz","🪵"],["Oregano","gewuerz","🌿"],["Basilikum","gewuerz","🌿"],["Sojasauce","gewuerz","🥢"],["Ketchup","gewuerz","🍅"],["Senf","gewuerz","🟡"],["Mayonnaise","gewuerz","🥚"],["Pesto","gewuerz","🌿"],["Chilisauce","gewuerz","🌶️"],["Sriracha","gewuerz","🌶️"],["Toilettenpapier","haushalt","🧻"],["Küchenrolle","haushalt","🧻"],["Spülmittel","haushalt","🧴"],["Waschmittel","haushalt","🧴"],["Müllbeutel","haushalt","🗑️"],["Zahnpasta","haushalt","🪥"],["Duschgel","haushalt","🧴"],["Shampoo","haushalt","🧴"],["Deo","haushalt","🧴"],["Rasierklingen","haushalt","🪒"],["Servietten","haushalt","🧻"],["Alufolie","haushalt","🧻"],["Frischhaltefolie","haushalt","🧻"],["Batterien","haushalt","🔋"],["Kerzen","haushalt","🕯️"]];
+
+  // Zwischenspeicher: bisherige Artikel (alle Listen) und eigene Artikel der Einkaufszettel App
+  let shopPoolCache = { custom: [], items: [] };
+
+  // Vorschlaege fuer die Eingabe. listId = Liste, in die eingetragen wird (z.B. Edeka); null = unbekannt.
+  // Prioritaet: 1) bisherige Artikel dieser Liste, 2) Artikel anderer Listen, 3) eigene Artikel, 4) Katalog.
+  // Zuerst Treffer am Wortanfang, dann Treffer innerhalb des Namens (erst ab 3 Buchstaben, sonst zu viel Rauschen).
+  function buildShopSuggester(listId) {
+    return function (query, typedNames) {
+      const q = query.toLowerCase();
+      const typed = new Set((typedNames || []).map((s) => s.toLowerCase()));
+      const openHere = new Set(
+        shopPoolCache.items
+          .filter((i) => listId && i.listId === listId && !i.checked)
+          .map((i) => String(i.n).toLowerCase())
+      );
+      const seen = new Set();
+      const found = [];
+      const consider = (name, icon, source) => {
+        if (!name) return;
+        const low = String(name).toLowerCase();
+        if (seen.has(low) || typed.has(low) || openHere.has(low)) return;
+        let rank;
+        if (low.startsWith(q)) rank = 0;
+        else if (low.split(/[\s\-\/]+/).some((w) => w.startsWith(q))) rank = 1;
+        else if (q.length >= 3 && low.includes(q)) rank = 2;
+        else return;
+        seen.add(low);
+        found.push({ name: String(name), icon: icon || '📝', rank, source });
+      };
+      const newestFirst = shopPoolCache.items.slice().reverse();
+      if (listId) newestFirst.filter((i) => i.listId === listId).forEach((i) => consider(i.n, i.i, 0));
+      newestFirst.filter((i) => !listId || i.listId !== listId).forEach((i) => consider(i.n, i.i, 1));
+      shopPoolCache.custom.forEach((c) => consider(c.n, c.i, 2));
+      SHOP_CATALOG.forEach((e) => consider(e[0], e[2], 3));
+      found.sort((a, b) => a.rank - b.rank || a.source - b.source);
+      return found.slice(0, 5);
+    };
+  }
+
+  // Kategorie und Symbol zu einem Artikelnamen (bekannte Artikel behalten ihre richtige Kategorie)
+  function findShopMeta(name) {
+    const low = String(name).toLowerCase();
+    const hist = shopPoolCache.items.find((i) => String(i.n).toLowerCase() === low);
+    if (hist) return { c: hist.c || 'sonstiges', i: hist.i || '📝', known: true };
+    const cu = shopPoolCache.custom.find((c) => String(c.n).toLowerCase() === low);
+    if (cu) return { c: cu.c || 'sonstiges', i: cu.i || '📝', known: true };
+    const cat = SHOP_CATALOG.find((e) => e[0].toLowerCase() === low);
+    if (cat) return { c: cat[1], i: cat[2], known: true };
+    return { c: 'sonstiges', i: '📝', known: false };
+  }
+  // SHOP_AUTOCOMPLETE_END
+
+  // Aktuelle Artikel und eigene Artikel der Einkaufszettel App laden
+  async function loadShopPool() {
     try {
-      const existingItems = await window.storage.get('shoppingapp:items', true);
-      if (existingItems) items = JSON.parse(existingItems.value);
-    } catch (e) {}
+      const [cRes, iRes] = await Promise.all([
+        window.storage.get('shoppingapp:custom', true),
+        window.storage.get('shoppingapp:items', true),
+      ]);
+      shopPoolCache.custom = cRes && cRes.value ? JSON.parse(cRes.value) : [];
+      shopPoolCache.items = iRes && iRes.value ? JSON.parse(iRes.value) : [];
+      return true;
+    } catch (e) {
+      console.error('Einkaufs Daten laden fehlgeschlagen:', e);
+      return false;
+    }
+  }
+
+  // Artikel in eine bestimmte Einkaufsliste eintragen (doppelte offene Artikel werden uebersprungen).
+  // Bekannte Artikel bekommen ihre richtige Kategorie und ihr Symbol, unbekannte werden wie in der
+  // Einkaufszettel App zu den eigenen Artikeln hinzugefuegt und sind dann auch dort vorschlagbar.
+  async function addShoppingItems(names, targetListId) {
+    const ok = await loadShopPool();
+    if (!ok) {
+      alert('Die Einkaufsliste konnte gerade nicht geladen werden. Bitte kurz erneut versuchen.');
+      return;
+    }
+    const items = shopPoolCache.items.slice();
+    const unknown = [];
 
     names.forEach((name) => {
       const already = items.find(
-        (it) => it.listId === targetListId && !it.checked && it.n.toLowerCase() === name.toLowerCase()
+        (it) => it.listId === targetListId && !it.checked && String(it.n).toLowerCase() === name.toLowerCase()
       );
-      if (!already) {
-        items.push({
-          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-          listId: targetListId,
-          n: name,
-          c: 'sonstiges',
-          i: '📝',
-          checked: false,
-          qty: 1,
-          addedVia: 'dashboard',
-        });
-      }
+      if (already) return;
+      const meta = findShopMeta(name);
+      if (!meta.known && !unknown.some((u) => u.toLowerCase() === name.toLowerCase())) unknown.push(name);
+      items.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        listId: targetListId,
+        n: name,
+        c: meta.c,
+        i: meta.i,
+        checked: false,
+        qty: 1,
+        addedVia: 'dashboard',
+      });
     });
 
     await window.storage.set('shoppingapp:items', JSON.stringify(items), true);
+    if (unknown.length > 0) {
+      const custom = shopPoolCache.custom.slice();
+      unknown.forEach((n) => custom.push({ n, c: 'sonstiges', i: '📝' }));
+      await window.storage.set('shoppingapp:custom', JSON.stringify(custom), true);
+      shopPoolCache.custom = custom;
+    }
+    shopPoolCache.items = items;
     await updateActionsOverview();
   }
 
@@ -2070,7 +2260,11 @@
     if (chipEl) {
       const list = shoppingListsById[chipEl.dataset.shopListId];
       if (list) {
-        const chipInput = await customPrompt('Was soll auf die Liste ' + list.name + '?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"');
+        const poolReadyChip = loadShopPool();
+        const chipInput = await customPrompt('Was soll auf die Liste ' + list.name + '?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"', {
+          suggest: buildShopSuggester(list.id),
+          ready: poolReadyChip,
+        });
         if (chipInput !== null && chipInput.trim()) {
           const chipNames = chipInput.split(',').map((n) => n.trim()).filter(Boolean);
           await addShoppingItems(chipNames, list.id);
@@ -2080,7 +2274,11 @@
     }
 
     if (e.target.closest('#shoppingCard')) {
-      const itemInput = await customPrompt('Was soll auf die Einkaufsliste?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"');
+      const poolReadyGeneral = loadShopPool();
+      const itemInput = await customPrompt('Was soll auf die Einkaufsliste?', 'Mehrere Artikel mit Komma trennen, z.B. "Milch, Eier, Butter"', {
+        suggest: buildShopSuggester(null),
+        ready: poolReadyGeneral,
+      });
       if (itemInput !== null && itemInput.trim()) {
         const names = itemInput.split(',').map((n) => n.trim()).filter(Boolean);
 
@@ -2105,7 +2303,7 @@
         }
 
         // Nutzer waehlen lassen, in welche Liste eingetragen werden soll
-        const chosenList = await pickList(lists);
+        const chosenList = await pickList(lists.filter((l) => !isHiddenShopList(l)));
         if (!chosenList) return; // abgebrochen
         await addShoppingItems(names, chosenList.id);
       }
