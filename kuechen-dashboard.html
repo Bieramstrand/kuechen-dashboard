@@ -261,6 +261,66 @@
       justify-content: center;
     }
     .radar-play-btn:active { background: #2E5A75; }
+    .radar-modebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .radar-mode-switch {
+      display: flex;
+      border: 1px solid #D9A441;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .mode-btn {
+      border: none;
+      background: #FBF8F1;
+      color: #5B5340;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+    .mode-btn.active { background: #3C6E8F; color: #FBF8F1; }
+    .forecast-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .forecast-info-label {
+      font-size: 0.72rem;
+      color: #8A8069;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #radarSubtitle {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .forecast-open-link {
+      margin-left: auto;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #3C6E8F;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .radar-container iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .radar-slider {
       flex: 1;
       -webkit-appearance: none;
@@ -788,16 +848,27 @@
           <div id="tempDetail" style="font-size:0.7rem; color:#8A8069; margin-top:-2px;"></div>
         </div>
       </div>
-      <p class="panel-subtitle">Norderstedt – Regenradar</p>
+      <div class="radar-modebar">
+        <p class="panel-subtitle" id="radarSubtitle" style="margin:0;">Norderstedt – Regenradar</p>
+        <div class="radar-mode-switch">
+          <button id="radarModeRadar" class="mode-btn active">Radar</button>
+          <button id="radarModeForecast" class="mode-btn">Vorhersage</button>
+        </div>
+      </div>
       <div class="radar-timeline">
         <button id="radarPlayBtn" class="radar-play-btn" aria-label="Abspielen">▶</button>
         <input type="range" id="radarSlider" class="radar-slider" min="0" max="0" value="0" step="1" />
+      </div>
+      <div class="forecast-info" id="forecastInfoRow" style="display:none;">
+        <span class="forecast-info-label">RegenRadar von WetterOnline, mit Vorhersage</span>
+        <a id="forecastOpenLink" class="forecast-open-link" href="#" target="_blank" rel="noopener" title="Größer öffnen">↗ Größer</a>
       </div>
       <div class="current-time" id="currentTimeDisplay">
         <span id="radarTimeBadge" class="radar-badge badge-past">Echtzeit</span>
       </div>
       <div class="radar-container">
         <div id="rainviewer-map" style="width: 100%; height: 100%;"></div>
+        <iframe id="forecastFrame" title="RegenRadar WetterOnline" style="display:none;" allow="fullscreen; web-share"></iframe>
         <button id="radarRecenterBtn" class="radar-recenter-btn" aria-label="Zurück zu Norderstedt" title="Zurück zu Norderstedt">📍</button>
       </div>
     </div>
@@ -1443,6 +1514,68 @@
       nowStepIndex = 24; // Uebergang Vergangenheit/Zukunft
       loadRainViewerData(() => showStep(nowStepIndex));
     }
+
+    // FORECAST_MODE_START
+    // ---- Vorhersage Modus: RegenRadar von WetterOnline (eingebettet, inklusive Vorhersage) ----
+    // Das eigene Radar (RainViewer) bleibt der Standard. Die Einbettung wird erst beim Antippen geladen
+    // und nach 3 Minuten automatisch wieder durch das Radar ersetzt, damit das Display nicht dauerhaft rechnet.
+    // Hinweis: radar.wo-cloud.com ist kein offiziell dokumentiertes Widget, WetterOnline kann es jederzeit aendern.
+    const FORECAST_TIMEOUT_MS = 3 * 60 * 1000;
+    let forecastTimer = null;
+
+    const modeRadarBtn = document.getElementById('radarModeRadar');
+    const modeForecastBtn = document.getElementById('radarModeForecast');
+    const timelineRow = document.querySelector('#weatherPanel .radar-timeline');
+    const timeDisplayEl = document.getElementById('currentTimeDisplay');
+    const forecastInfoRow = document.getElementById('forecastInfoRow');
+    const mapEl = document.getElementById('rainviewer-map');
+    const recenterBtnEl = document.getElementById('radarRecenterBtn');
+    const forecastFrame = document.getElementById('forecastFrame');
+    const forecastOpenLink = document.getElementById('forecastOpenLink');
+    const subtitleEl = document.getElementById('radarSubtitle');
+
+    // view: 'mobile' (fuer die kleine Kachel) oder 'desktop' (fuer die grosse Ansicht im neuen Tab)
+    function wetterOnlineUrl(view) {
+      const pos = HOME_VIEW.center[0].toFixed(3) + ',' + HOME_VIEW.center[1].toFixed(3);
+      return 'https://radar.wo-cloud.com/' + view + '/rr/embedded?wrx=' + pos + '&wrm=9&wry=' + pos +
+        '&timeZone=Europe%2FBerlin&wro=true';
+    }
+
+    function showRadarMode() {
+      clearTimeout(forecastTimer);
+      forecastFrame.src = 'about:blank';
+      forecastFrame.style.display = 'none';
+      mapEl.style.display = '';
+      recenterBtnEl.style.display = '';
+      timelineRow.style.display = '';
+      timeDisplayEl.style.display = '';
+      forecastInfoRow.style.display = 'none';
+      modeRadarBtn.classList.add('active');
+      modeForecastBtn.classList.remove('active');
+      subtitleEl.textContent = 'Norderstedt – Regenradar';
+      setTimeout(() => map.invalidateSize(), 50);
+    }
+
+    function showForecastMode() {
+      stopPlaying();
+      mapEl.style.display = 'none';
+      recenterBtnEl.style.display = 'none';
+      timelineRow.style.display = 'none';
+      timeDisplayEl.style.display = 'none';
+      forecastInfoRow.style.display = 'flex';
+      forecastFrame.style.display = 'block';
+      forecastFrame.src = wetterOnlineUrl('mobile');
+      forecastOpenLink.href = wetterOnlineUrl('desktop');
+      modeForecastBtn.classList.add('active');
+      modeRadarBtn.classList.remove('active');
+      subtitleEl.textContent = 'Norderstedt – Vorhersage';
+      clearTimeout(forecastTimer);
+      forecastTimer = setTimeout(showRadarMode, FORECAST_TIMEOUT_MS);
+    }
+
+    modeRadarBtn.addEventListener('click', showRadarMode);
+    modeForecastBtn.addEventListener('click', showForecastMode);
+    // FORECAST_MODE_END
 
     init();
     setInterval(init, 5 * 60 * 1000);
