@@ -12,8 +12,6 @@
   <title>Küchen Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
@@ -144,27 +142,8 @@
       background: #f0f0f0;
       position: relative;
     }
-    .radar-recenter-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      z-index: 1000;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: none;
-      background: #FBF8F1;
-      color: #3C6E8F;
-      font-size: 1.1rem;
-      box-shadow: 0 2px 6px rgba(42,36,23,0.3);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .radar-recenter-btn:active {
-      background: #E4DCC5;
-    }
+
+
     .refresh-fab {
       position: fixed;
       bottom: 16px;
@@ -194,18 +173,7 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    .home-marker-inner {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #3C6E8F;
-      border: 3px solid #FBF8F1;
-      box-shadow: 0 1px 5px rgba(42,36,23,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-    }
+
     .radar-embed {
       width: 100%;
       height: 100%;
@@ -240,27 +208,9 @@
       color: #FBF8F1;
       border-color: #3C6E8F;
     }
-    .radar-timeline {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-    .radar-play-btn {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: #3C6E8F;
-      color: #FBF8F1;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .radar-play-btn:active { background: #2E5A75; }
+
+
+
     .radar-modebar {
       display: flex;
       align-items: center;
@@ -268,51 +218,34 @@
       gap: 8px;
       margin-bottom: 6px;
     }
-    .radar-mode-switch {
-      display: flex;
-      border: 1px solid #D9A441;
-      border-radius: 8px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .mode-btn {
-      border: none;
-      background: #FBF8F1;
-      color: #5B5340;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      cursor: pointer;
-    }
+
+
     .mode-btn.active { background: #3C6E8F; color: #FBF8F1; }
-    .forecast-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .forecast-info-label {
-      font-size: 0.72rem;
-      color: #8A8069;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+
+
     #radarSubtitle {
       min-width: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .forecast-open-link {
-      margin-left: auto;
-      font-size: 0.78rem;
-      font-weight: 600;
+
+    .radar-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .radar-action-btn {
+      border: 1px solid #E4DCC5;
+      background: #F1ECDD;
       color: #3C6E8F;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
       text-decoration: none;
       white-space: nowrap;
+      line-height: 1.3;
+      font-family: inherit;
     }
+    .radar-action-btn:active { background: #E4DCC5; }
     .radar-container iframe {
       position: absolute;
       inset: 0;
@@ -321,54 +254,13 @@
       border: 0;
     }
 
-    .radar-slider {
-      flex: 1;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      border-radius: 3px;
-      background: #E4DCC5;
-      outline: none;
-    }
-    .radar-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #D9A441;
-      border: 3px solid #FBF8F1;
-      box-shadow: 0 1px 4px rgba(42,36,23,0.3);
-      cursor: pointer;
-    }
-    .radar-slider::-moz-range-thumb {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #D9A441;
-      border: 3px solid #FBF8F1;
-      cursor: pointer;
-    }
-    .current-time {
-      font-size: 0.8rem;
-      color: #8A8069;
-      text-align: center;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .radar-badge {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      padding: 2px 9px;
-      border-radius: 10px;
-      letter-spacing: 0.03em;
-    }
-    .radar-badge.badge-past { background: #8A8069; color: #FBF8F1; }
-    .radar-badge.badge-future { background: #D9A441; color: #2E2A22; }
+
+
+
+
+
+
+
 
     /* HVV Panel */
     #hvvPanel {
@@ -849,27 +741,14 @@
         </div>
       </div>
       <div class="radar-modebar">
-        <p class="panel-subtitle" id="radarSubtitle" style="margin:0;">Norderstedt – Regenradar</p>
-        <div class="radar-mode-switch">
-          <button id="radarModeRadar" class="mode-btn active">Radar</button>
-          <button id="radarModeForecast" class="mode-btn">Vorhersage</button>
+        <p class="panel-subtitle" id="radarSubtitle" style="margin:0;">Norderstedt</p>
+        <div class="radar-actions">
+          <button id="radarReplayBtn" class="radar-action-btn" title="Animation abspielen">▶ Abspielen</button>
+          <a id="forecastOpenLink" class="radar-action-btn" href="#" target="_blank" rel="noopener" title="Größer öffnen">↗ Größer</a>
         </div>
       </div>
-      <div class="radar-timeline">
-        <button id="radarPlayBtn" class="radar-play-btn" aria-label="Abspielen">▶</button>
-        <input type="range" id="radarSlider" class="radar-slider" min="0" max="0" value="0" step="1" />
-      </div>
-      <div class="forecast-info" id="forecastInfoRow" style="display:none;">
-        <span class="forecast-info-label">RegenRadar von WetterOnline, mit Vorhersage</span>
-        <a id="forecastOpenLink" class="forecast-open-link" href="#" target="_blank" rel="noopener" title="Größer öffnen">↗ Größer</a>
-      </div>
-      <div class="current-time" id="currentTimeDisplay">
-        <span id="radarTimeBadge" class="radar-badge badge-past">Echtzeit</span>
-      </div>
       <div class="radar-container">
-        <div id="rainviewer-map" style="width: 100%; height: 100%;"></div>
-        <iframe id="forecastFrame" title="RegenRadar WetterOnline" style="display:none;" allow="fullscreen; web-share"></iframe>
-        <button id="radarRecenterBtn" class="radar-recenter-btn" aria-label="Zurück zu Norderstedt" title="Zurück zu Norderstedt">📍</button>
+        <iframe id="forecastFrame" title="RegenRadar WetterOnline mit Vorhersage" allow="fullscreen; web-share"></iframe>
       </div>
     </div>
 
@@ -1360,225 +1239,37 @@
     }
   }
 
-  // RainViewer Karte initialisieren
-  function initRainViewer() {
-    const HOME_VIEW = { center: [53.683943, 9.979259], zoom: 13 }; // Achternfelde 22D, Norderstedt
-    const map = L.map('rainviewer-map').setView(HOME_VIEW.center, HOME_VIEW.zoom);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 18
-    }).addTo(map);
+  // Regenradar: RegenRadar von WetterOnline (eingebettet, inklusive Vorhersage)
+  // Hinweis: radar.wo-cloud.com ist kein offiziell dokumentiertes Widget, WetterOnline kann es jederzeit aendern.
+  function initRegenradar() {
+    const HOME = [53.683943, 9.979259]; // Achternfelde 22D, Norderstedt
+    const AUTOPLAY_MS = 40 * 1000;      // Animation laeuft ca. zwei Durchlaeufe, dann steht die Karte still
+    const REFRESH_MS = 10 * 60 * 1000;  // Karte regelmaessig still neu laden, damit das Bild aktuell bleibt
+    const frame = document.getElementById('forecastFrame');
+    const openLink = document.getElementById('forecastOpenLink');
+    const replayBtn = document.getElementById('radarReplayBtn');
+    let stopTimer = null;
 
-    // Zuhause-Marker (eigenes Haus-Symbol statt Standard-Pin)
-    const homeIcon = L.divIcon({
-      className: 'home-marker',
-      html: '<div class="home-marker-inner">🏠</div>',
-      iconSize: [34, 34],
-      iconAnchor: [17, 17],
-    });
-    L.marker(HOME_VIEW.center, { icon: homeIcon, zIndexOffset: 1000 })
-      .addTo(map)
-      .bindPopup('Zuhause');
-
-    document.getElementById('radarRecenterBtn').addEventListener('click', () => {
-      map.setView(HOME_VIEW.center, HOME_VIEW.zoom);
-    });
-
-    let rainLayer = null;
-    let frames = []; // RainViewer-Frames, { time, path }
-    let tileHost = 'https://tilecache.rainviewer.com';
-    let playing = false;
-    let playTimer = null;
-    let playCount = 0;
-
-    const playBtn = document.getElementById('radarPlayBtn');
-    const slider = document.getElementById('radarSlider');
-    const badge = document.getElementById('radarTimeBadge');
-
-    // Zeitstrahl: 2 Stunden Vergangenheit (24x5min) + 2 Stunden Zukunft-Platzhalter (24x5min)
-    // RainViewer (kostenlos) liefert keine echte Vorhersage, siehe showStep()
-    let timeSteps = [];
-    let nowStepIndex = 0;
-
-    function generateTimeSteps() {
-      const steps = [];
-      const now = new Date();
-      now.setSeconds(0, 0);
-      now.setMinutes(Math.floor(now.getMinutes() / 5) * 5);
-
-      for (let i = -24; i <= 0; i++) {
-        steps.push({ time: new Date(now.getTime() + i * 5 * 60000), type: 'past' });
-      }
-      for (let i = 1; i <= 24; i++) {
-        steps.push({ time: new Date(now.getTime() + i * 5 * 60000), type: 'future' });
-      }
-      return steps;
-    }
-
-    function showStep(index) {
-      const step = timeSteps[index];
-      if (!step) return;
-      slider.value = index;
-      if (rainLayer) map.removeLayer(rainLayer);
-
-      if (step.type === 'future' || frames.length === 0) {
-        // Keine echte Vorhersage verfuegbar - letztes bekanntes Bild zeigen, ehrlich gekennzeichnet
-        updateTimeUI(step, frames.length > 0 ? '(keine Vorhersage verfügbar, letzter Stand)' : '(lädt…)');
-        if (frames.length > 0) {
-          const f = frames[frames.length - 1];
-          const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
-          rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
-        }
-        return;
-      }
-
-      const targetTimestamp = Math.floor(step.time.getTime() / 1000);
-      let closestIdx = 0, closestDiff = Infinity;
-      frames.forEach((f, i) => {
-        const diff = Math.abs(f.time - targetTimestamp);
-        if (diff < closestDiff) { closestDiff = diff; closestIdx = i; }
-      });
-      const f = frames[closestIdx];
-      if (f) {
-        const url = `${tileHost}${f.path}/512/{z}/{x}/{y}/2/1_1.png`;
-        rainLayer = L.tileLayer(url, { tms: false, opacity: 0.7, maxZoom: 18, maxNativeZoom: 7 }).addTo(map);
-      }
-      updateTimeUI(step, '(RainViewer)');
-    }
-
-    function updateTimeUI(step, sourceLabel) {
-      const timeStr = step.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      if (step.type === 'future') {
-        badge.textContent = 'Prognose';
-        badge.className = 'radar-badge badge-future';
-      } else {
-        badge.textContent = 'Echtzeit';
-        badge.className = 'radar-badge badge-past';
-      }
-      let timeSpan = document.getElementById('radarTimeText');
-      if (!timeSpan) {
-        timeSpan = document.createElement('span');
-        timeSpan.id = 'radarTimeText';
-        document.getElementById('currentTimeDisplay').prepend(timeSpan);
-      }
-      timeSpan.textContent = timeStr + ' Uhr ' + sourceLabel;
-    }
-
-    function loadRainViewerData(callback) {
-      fetch('https://api.rainviewer.com/public/weather-maps.json')
-        .then(res => res.json())
-        .then(data => {
-          tileHost = data.host || tileHost;
-          frames = (data.radar && data.radar.past) || [];
-          if (callback) callback();
-        })
-        .catch(e => console.error('RainViewer Ladefehler:', e));
-    }
-
-    slider.addEventListener('input', (e) => {
-      stopPlaying();
-      showStep(parseInt(e.target.value, 10));
-    });
-
-    function stepFrame() {
-      playCount++;
-      if (playCount >= timeSteps.length * 2) {
-        stopPlaying();
-        showStep(nowStepIndex);
-        return;
-      }
-      let next = parseInt(slider.value, 10) + 1;
-      if (next > timeSteps.length - 1) next = 0;
-      showStep(next);
-    }
-
-    function startPlaying() {
-      playing = true;
-      playCount = 0;
-      playBtn.textContent = '⏸';
-      playTimer = setInterval(stepFrame, 600);
-    }
-    function stopPlaying() {
-      playing = false;
-      playBtn.textContent = '▶';
-      if (playTimer) { clearInterval(playTimer); playTimer = null; }
-    }
-    playBtn.addEventListener('click', () => {
-      if (playing) stopPlaying(); else startPlaying();
-    });
-
-    function init() {
-      timeSteps = generateTimeSteps();
-      slider.max = timeSteps.length - 1;
-      nowStepIndex = 24; // Uebergang Vergangenheit/Zukunft
-      loadRainViewerData(() => showStep(nowStepIndex));
-    }
-
-    // FORECAST_MODE_START
-    // ---- Vorhersage Modus: RegenRadar von WetterOnline (eingebettet, inklusive Vorhersage) ----
-    // Das eigene Radar (RainViewer) bleibt der Standard. Die Einbettung wird erst beim Antippen geladen
-    // und nach 3 Minuten automatisch wieder durch das Radar ersetzt, damit das Display nicht dauerhaft rechnet.
-    // Hinweis: radar.wo-cloud.com ist kein offiziell dokumentiertes Widget, WetterOnline kann es jederzeit aendern.
-    const FORECAST_TIMEOUT_MS = 3 * 60 * 1000;
-    let forecastTimer = null;
-
-    const modeRadarBtn = document.getElementById('radarModeRadar');
-    const modeForecastBtn = document.getElementById('radarModeForecast');
-    const timelineRow = document.querySelector('#weatherPanel .radar-timeline');
-    const timeDisplayEl = document.getElementById('currentTimeDisplay');
-    const forecastInfoRow = document.getElementById('forecastInfoRow');
-    const mapEl = document.getElementById('rainviewer-map');
-    const recenterBtnEl = document.getElementById('radarRecenterBtn');
-    const forecastFrame = document.getElementById('forecastFrame');
-    const forecastOpenLink = document.getElementById('forecastOpenLink');
-    const subtitleEl = document.getElementById('radarSubtitle');
-
-    // view: 'mobile' (fuer die kleine Kachel) oder 'desktop' (fuer die grosse Ansicht im neuen Tab)
-    function wetterOnlineUrl(view) {
-      const pos = HOME_VIEW.center[0].toFixed(3) + ',' + HOME_VIEW.center[1].toFixed(3);
+    // view: 'mobile' (Kachel) oder 'desktop' (grosse Ansicht); autoplay: Animation startet sofort
+    function url(view, autoplay) {
+      const pos = HOME[0].toFixed(3) + ',' + HOME[1].toFixed(3);
       return 'https://radar.wo-cloud.com/' + view + '/rr/embedded?wrx=' + pos + '&wrm=9&wry=' + pos +
-        '&timeZone=Europe%2FBerlin&wro=true';
+        '&timeZone=Europe%2FBerlin' + (autoplay ? '&wro=true' : '');
+    }
+    function play() {
+      frame.src = url('mobile', true);
+      clearTimeout(stopTimer);
+      stopTimer = setTimeout(() => { frame.src = url('mobile', false); }, AUTOPLAY_MS);
+    }
+    function refreshStill() {
+      clearTimeout(stopTimer);
+      frame.src = url('mobile', false);
     }
 
-    function showRadarMode() {
-      clearTimeout(forecastTimer);
-      forecastFrame.src = 'about:blank';
-      forecastFrame.style.display = 'none';
-      mapEl.style.display = '';
-      recenterBtnEl.style.display = '';
-      timelineRow.style.display = '';
-      timeDisplayEl.style.display = '';
-      forecastInfoRow.style.display = 'none';
-      modeRadarBtn.classList.add('active');
-      modeForecastBtn.classList.remove('active');
-      subtitleEl.textContent = 'Norderstedt – Regenradar';
-      setTimeout(() => map.invalidateSize(), 50);
-    }
-
-    function showForecastMode() {
-      stopPlaying();
-      mapEl.style.display = 'none';
-      recenterBtnEl.style.display = 'none';
-      timelineRow.style.display = 'none';
-      timeDisplayEl.style.display = 'none';
-      forecastInfoRow.style.display = 'flex';
-      forecastFrame.style.display = 'block';
-      forecastFrame.src = wetterOnlineUrl('mobile');
-      forecastOpenLink.href = wetterOnlineUrl('desktop');
-      modeForecastBtn.classList.add('active');
-      modeRadarBtn.classList.remove('active');
-      subtitleEl.textContent = 'Norderstedt – Vorhersage';
-      clearTimeout(forecastTimer);
-      forecastTimer = setTimeout(showRadarMode, FORECAST_TIMEOUT_MS);
-    }
-
-    modeRadarBtn.addEventListener('click', showRadarMode);
-    modeForecastBtn.addEventListener('click', showForecastMode);
-    // FORECAST_MODE_END
-
-    init();
-    setInterval(init, 5 * 60 * 1000);
+    openLink.href = url('desktop', true);
+    replayBtn.addEventListener('click', play);
+    play();
+    setInterval(refreshStill, REFRESH_MS);
   }
 
   // Kalender aus Speicher laden (Trips + ICS Uploads)
@@ -2550,7 +2241,7 @@
 
   // Initialisierung
   (async function init() {
-    initRainViewer();
+    initRegenradar();
     await loadTemperature();
     await renderCalendar();
     await loadHVVData();
