@@ -1,4 +1,4 @@
-// U1 live: Fahrzeugbewegungen der U1 rund um Garstedt (Geofox GTI, Methode getVehicleMap)
+// U Bahn live: Fahrzeugbewegungen der Linien U1 bis U4 (Geofox GTI, Methode getVehicleMap)
 // Liefert pro Fahrt die Streckenabschnitte mit Zeiten und Gleisverlauf. Die Seite ubahn-live.html
 // berechnet daraus die aktuelle Position jedes Zuges (keine GPS Ortung).
 const fetch = require('node-fetch');
@@ -8,12 +8,13 @@ const GTI_BASE = 'https://gti.geofox.de';
 const GEOFOX_USER = process.env.GEOFOX_USER;
 const GEOFOX_PASSWORD = process.env.GEOFOX_PASSWORD;
 
-// Kartenausschnitt: Norderstedt Mitte bis Fuhlsbüttel Nord (WGS84, x = Länge, y = Breite)
+// Kartenausschnitt: gesamtes U Bahn Netz U1 bis U4 (WGS84, x = Länge, y = Breite)
 const BOX = {
-  lowerLeft: { x: 9.95, y: 53.615, type: 'EPSG_4326' },
-  upperRight: { x: 10.07, y: 53.72, type: 'EPSG_4326' },
+  lowerLeft: { x: 9.90, y: 53.48, type: 'EPSG_4326' },
+  upperRight: { x: 10.27, y: 53.73, type: 'EPSG_4326' },
 };
-const LINE_NAME = 'U1';
+const LINE_NAMES = ['U1', 'U2', 'U3', 'U4'];
+const DEFAULT_LINE = 'U1';
 const WINDOW_BEFORE_S = 5 * 60;  // etwas Vergangenheit, damit gerade fahrende Züge vollständig sind
 const WINDOW_AFTER_S = 20 * 60;  // 20 Minuten Zukunft: Animation bis zur nächsten Abfrage, Strecke vollständig
 
@@ -69,9 +70,12 @@ function toLatLngs(track) {
   return out;
 }
 
+function lineName(journey) {
+  return String((journey.line && journey.line.name) || '').replace(/\s+/g, '').toUpperCase();
+}
+
 function isLine(journey) {
-  const name = String((journey.line && journey.line.name) || '').replace(/\s+/g, '').toUpperCase();
-  return name === LINE_NAME;
+  return LINE_NAMES.includes(lineName(journey));
 }
 
 function compactJourney(j) {
@@ -95,7 +99,7 @@ function compactJourney(j) {
   const lastWithDest = segments.slice().reverse().find((s) => s.destination);
   return {
     id: String(j.journeyID || ''),
-    line: (j.line && j.line.name) || LINE_NAME,
+    line: lineName(j) || DEFAULT_LINE,
     direction: (j.line && j.line.direction) || '',
     destination: (lastWithDest && lastWithDest.destination) || (j.line && j.line.direction) || '',
     realtime: !!j.realtime,
@@ -140,13 +144,13 @@ exports.handler = async (event) => {
       journeys = (raw && raw.journeys) || [];
     }
 
-    const u1 = journeys.filter(isLine).map(compactJourney).filter((j) => j.segments.length > 0);
+    const found = journeys.filter(isLine).map(compactJourney).filter((j) => j.segments.length > 0);
 
     const body = {
       success: true,
       serverNow: Date.now(),
-      line: LINE_NAME,
-      journeys: u1,
+      lines: LINE_NAMES,
+      journeys: found,
       usedFallback,
     };
     if (debug) {
