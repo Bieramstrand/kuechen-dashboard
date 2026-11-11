@@ -644,47 +644,6 @@
       color: #8A8069;
       white-space: nowrap;
     }
-    /* Müllabfuhr Liste unten im Kalenderfeld */
-    .muell-box {
-      flex-shrink: 0;
-      background: #F1ECDD;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .muell-box:active { background: #E4DCC5; }
-    .muell-box-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 700;
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-    }
-    .muell-box-edit { font-size: 0.7rem; font-weight: 500; color: #8A8069; }
-    .muell-box-week {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: #8A8069;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin: 6px 0 3px;
-    }
-    .muell-box-day {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-      padding: 2px 0;
-    }
-    .muell-box-day.vorbei { opacity: 0.45; }
-    .muell-box-day.heute { font-weight: 700; color: #A86A1E; }
-    .muell-box-date { width: 64px; flex-shrink: 0; color: #5B5340; }
-    .muell-box-day.heute .muell-box-date { color: #A86A1E; }
-    .muell-box-types { display: flex; flex-wrap: wrap; gap: 4px 10px; }
-    .muell-box-type { display: inline-flex; align-items: center; gap: 5px; }
     .muell-rows { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 0; }
     .muell-row {
       display: grid;
@@ -860,11 +819,9 @@
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <div class="calendar-events" id="calendarEvents"></div>
-      <!-- Müllabfuhr diese und nächste Woche (antippen = einstellen) -->
-      <div class="muell-box" id="muellBox" title="Müllplan einstellen"></div>
       <div class="last-update" id="calendarUpdate"></div>
       <!-- Versionsnummer: bei jeder Aenderung erhoehen (kleine Aenderung +0.1, grosser Umbau naechste ganze Zahl) und Datum anpassen -->
-      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.8 · 11.11.2026</div>
+      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.9 · 11.11.2026</div>
     </div>
 
     <!-- Wetter/Radar -->
@@ -2452,7 +2409,6 @@
 
   async function renderMuellplan() {
     const strip = document.getElementById('muellStrip');
-    const box = document.getElementById('muellBox');
     try {
       const res = await window.storage.get('household:muellplan', true);
       if (res && res.value) muellPlan = JSON.parse(res.value) || { tonnen: {} };
@@ -2503,28 +2459,6 @@
         }).join('');
       }
     }
-
-    // Ausführliche Liste im Kalenderfeld
-    if (box) {
-      let html = '<div class="muell-box-title"><span>🗑️ Müllabfuhr</span><span class="muell-box-edit">einstellen ›</span></div>';
-      if (nichtsEingestellt) {
-        html += '<div class="muell-box-day" style="color:#8A8069;">Antippen, um die Abholtage der Tonnen einzutragen.</div>';
-      } else {
-        ['Diese Woche', 'Nächste Woche'].forEach((label, w) => {
-          html += `<div class="muell-box-week">${label}</div>`;
-          if (wochen[w].length === 0) {
-            html += '<div class="muell-box-day" style="color:#9B9280;">Keine Abholung</div>';
-          }
-          wochen[w].forEach((tag) => {
-            const datum = tag.status === 'heute' ? 'Heute' : tag.status === 'morgen' ? 'Morgen'
-              : `${wtag(tag.d)} ${tag.d.getDate()}.${tag.d.getMonth() + 1}.`;
-            const typen = tag.tonnen.map((t) => `<span class="muell-box-type">${dot(t)}${t.name}</span>`).join('');
-            html += `<div class="muell-box-day ${tag.status}"><span class="muell-box-date">${datum}</span><span class="muell-box-types">${typen}</span></div>`;
-          });
-        });
-      }
-      box.innerHTML = html;
-    }
   }
 
   // Einstellungsdialog
@@ -2556,7 +2490,6 @@
     document.getElementById('muellOverlay').classList.add('hidden');
   }
   document.getElementById('muellStrip').addEventListener('click', openMuellDialog);
-  document.getElementById('muellBox').addEventListener('click', openMuellDialog);
   document.getElementById('muellCancelBtn').addEventListener('click', closeMuellDialog);
   document.getElementById('muellOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'muellOverlay') closeMuellDialog();
