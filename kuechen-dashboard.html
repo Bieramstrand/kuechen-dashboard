@@ -582,6 +582,130 @@
       color: #FBF8F1;
     }
     .modal-btn.ok:active { background: #2E5A75; }
+
+    /* Müllplan in der Kopfzeile "Übersicht diese Woche" */
+    .muell-strip {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 8px;
+      row-gap: 4px;
+      align-items: center;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      user-select: none;
+    }
+    .muell-strip:active { background: #F1ECDD; }
+    .muell-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #8A8069;
+      white-space: nowrap;
+      text-align: right;
+    }
+    .muell-chips {
+      display: flex;
+      gap: 4px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .muell-chips::-webkit-scrollbar { display: none; }
+    .muell-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #2E2A22;
+      background: #F1ECDD;
+      border-radius: 999px;
+      padding: 2px 8px 2px 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border: 1.5px solid transparent;
+    }
+    .muell-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+    }
+    .muell-chip.vorbei { opacity: 0.45; }
+    .muell-chip.heute { border-color: #C4883A; background: #FBEBD0; }
+    .muell-chip.morgen { border-color: #D9A441; }
+    .muell-none { font-size: 0.72rem; color: #9B9280; white-space: nowrap; }
+    .muell-setup {
+      grid-column: 1 / 3;
+      font-size: 0.75rem;
+      color: #8A8069;
+      white-space: nowrap;
+    }
+    /* Müllabfuhr Liste unten im Kalenderfeld */
+    .muell-box {
+      flex-shrink: 0;
+      background: #F1ECDD;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .muell-box:active { background: #E4DCC5; }
+    .muell-box-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    .muell-box-edit { font-size: 0.7rem; font-weight: 500; color: #8A8069; }
+    .muell-box-week {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #8A8069;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 6px 0 3px;
+    }
+    .muell-box-day {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      padding: 2px 0;
+    }
+    .muell-box-day.vorbei { opacity: 0.45; }
+    .muell-box-day.heute { font-weight: 700; color: #A86A1E; }
+    .muell-box-date { width: 64px; flex-shrink: 0; color: #5B5340; }
+    .muell-box-day.heute .muell-box-date { color: #A86A1E; }
+    .muell-box-types { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+    .muell-box-type { display: inline-flex; align-items: center; gap: 5px; }
+    .muell-rows { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 0; }
+    .muell-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      background: #F1ECDD;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .muell-row-name { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; min-width: 0; }
+    .muell-row select, .muell-row input {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 6px 8px;
+      border: 1.5px solid #E4DCC5;
+      border-radius: 6px;
+      background: #FFFFFF;
+      color: #2E2A22;
+    }
+    .muell-row input:disabled { opacity: 0.4; }
     .list-picker-options {
       display: flex;
       flex-direction: column;
@@ -736,9 +860,11 @@
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <div class="calendar-events" id="calendarEvents"></div>
+      <!-- Müllabfuhr diese und nächste Woche (antippen = einstellen) -->
+      <div class="muell-box" id="muellBox" title="Müllplan einstellen"></div>
       <div class="last-update" id="calendarUpdate"></div>
       <!-- Versionsnummer: bei jeder Aenderung erhoehen (kleine Aenderung +0.1, grosser Umbau naechste ganze Zahl) und Datum anpassen -->
-      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.7 · 25.10.2026</div>
+      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.8 · 11.11.2026</div>
     </div>
 
     <!-- Wetter/Radar -->
@@ -780,7 +906,9 @@
     <!-- Nächste Aktionen -->
     <div class="panel" id="actionsPanel">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
-        <h2 class="panel-title" style="margin:0;">Übersicht diese Woche</h2>
+        <h2 class="panel-title" style="margin:0; flex-shrink:0;">Übersicht diese Woche</h2>
+        <!-- Müllplan: welche Tonnen diese und nächste Woche abgeholt werden (antippen = einstellen) -->
+        <div class="muell-strip" id="muellStrip" title="Müllplan einstellen"></div>
         <a href="https://www.taskcards.de/#/board/242a6c8d-0853-45d4-a16e-9773175836ae/view?token=8651b56c-95aa-40e3-8c76-9dda67447feb" target="_blank" rel="noopener" class="kita-btn">
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAD/ElEQVR4nO3dwWqTaRTH4XaYa3AvAy4HZzULlwregYheiCtBcDW3ISjiHQh6Aa5mmKUwzFqvYhaBkPmS/9s0pjnnTZ9n1SaLHt7+epIvpO3ltzcPLmCXn6oHoC9xEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iD6uXqAw/3597+bn/72692qSbZ1nm1/s26OxenvvKVK59muZco40ll3+B50nu26Lqf74y2bp/z4j39WH3x88cv6xsId3nm2A0y5OVbWp7/4uIPOs+1v4ji4aV2uVo74kNz50X3/2To8ANU/5/iR7+XOx/UmjjJbbSLFcXT+KW+isI/K5xzK2EfhKZXFoYz9VZ1VTRzKuK6SE3MpS1QQh7VxmNOfm81BJA4icRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEFU8EtN8/56YLnvbx+d8svZHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB1GXPxg39urd6/99+uxl1SS3ygSbY1HGzlu4Cd03R+rg1bvX4/3x15fPNzPRMd3//WH1CCOtN8d4QwzunaKMi/Zzto7jMM1PfKHztGcYB8ciDqIzjKP5s7yFztO2jmN8PTK4t/OJb2o+Z/tL2Wcvd16VXPk6WPNzn0LrzbGy3YFXSE+j++ZYUUOJCTYHVcRBJA4icRCJg0gcROIgEgeROIjEQTTHy+dfnzzd/PTeh/dVk9wqE2yORRk7b+EmdN8cqYOvT56O90fn92auNX9fQevNMd4Qg3unKOOi/Zyt4zhM8xNf6DztGcbBsYiD6AzjaP4sb6HztK3jGF+PDO7tfOKbms/Z/VL23of3O69KrnwdrPm5T6H15ljZ7sArpKfRfXOsqKHEBJuDKuIgEgeROIjEQSQOInEQiYNIHETiIJrj5fPF/1O98/xT1SS3ygSbY/s/7Z74f+/eWt03R+rg+9tH4/3R+b2Za83fV9B6c4w3xODeKcq4aD9n6zgO0/zEFzpPe4ZxcCziIDrDOJo/y1voPG3rOMbXI4N7O5/4puZzdr+UvfP8086rkitfB2t+7lNovTlWtjvwCulpdN8cK2ooMcHmoIo4iMRBJA4icRCJg0gcROIgEgeROIjEQSQOInEQFcTht04Oc/pzszmIauKwPK6r5MTKNoc+9ld1VpUPK/rYR+EpFT/n0MdY7flcfnvzoPDLr3mX6EKHH5sucdCQS1kicRCJg0gcROIgEgeROIjEQSQOInEQiYNIHETiIBIHkTiIxEEkDiJxEImDSBxE4iASB5E4iMRBJA4icRCJg0gcROIgEgfRf1XO9JFY3E8qAAAAAElFTkSuQmCC" alt="" />
           <span>Kitaplan</span>
@@ -867,6 +995,19 @@
       <div class="modal-actions">
         <button class="modal-btn cancel" id="modalCancelBtn">Abbrechen</button>
         <button class="modal-btn ok" id="modalOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Müllplan einstellen -->
+  <div class="modal-overlay hidden" id="muellOverlay">
+    <div class="modal-card" style="max-height: calc(100% - 48px); overflow-y: auto; max-width: 480px;">
+      <p class="modal-title">Müllplan</p>
+      <p class="modal-hint">Pro Tonne den Rhythmus und einen bekannten Abholtag eintragen, der Rest wird automatisch berechnet. Termine aus der ICS Datei (z.B. Abfallkalender) werden zusätzlich erkannt.</p>
+      <div class="muell-rows" id="muellRows"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="muellCancelBtn">Abbrechen</button>
+        <button class="modal-btn ok" id="muellSaveBtn">Speichern</button>
       </div>
     </div>
   </div>
@@ -1517,6 +1658,7 @@
     await window.storage.set('household:calendar-ics-events', JSON.stringify(events), true);
     await window.storage.set('household:calendar-ics-imported-at', Date.now().toString(), true);
     await renderCalendar();
+    await renderMuellplan();
     await syncCalendarTasks();
     await updateActionsOverview();
 
@@ -2250,11 +2392,198 @@
     }
   }
 
+  // ===== Müllplan =====
+  // Gespeichert in Firestore unter 'household:muellplan':
+  // { tonnen: { rest: { rhythmus: 2, datum: 'yyyy-mm-dd' }, ... } }
+  // rhythmus = Abstand in Wochen (0 = keine Abholung), datum = irgendein bekannter Abholtag als Anker.
+  // Zusätzlich werden Termine aus der ICS Datei per Stichwort erkannt (z.B. Abfallkalender der Stadt).
+  const MUELL_TONNEN = [
+    { id: 'rest',   name: 'Restmüll',    kurz: 'Rest',   farbe: '#4A4A48', muster: /rest\s*(müll|muell|abfall)|graue tonne|schwarze tonne|hausmüll/i },
+    { id: 'bio',    name: 'Biotonne',    kurz: 'Bio',    farbe: '#8B5A2B', muster: /bio\s*(müll|muell|abfall|tonne)|braune tonne|grünabfall/i },
+    { id: 'papier', name: 'Papier',      kurz: 'Papier', farbe: '#2F6DB5', muster: /papier|pappe|blaue tonne/i },
+    { id: 'gelb',   name: 'Gelbe Tonne', kurz: 'Gelb',   farbe: '#E8C21C', muster: /gelbe?[rn]?\s*(sack|säcke|tonne)|wertstoff|verpackung/i },
+    { id: 'glas',   name: 'Glas',        kurz: 'Glas',   farbe: '#3E8E5A', muster: /altglas|glas\s*(container|tonne)/i },
+    { id: 'sperr',  name: 'Sperrmüll',   kurz: 'Sperr',  farbe: '#B0662F', muster: /sperr\s*(müll|muell)/i },
+  ];
+  let muellPlan = { tonnen: {} };
+
+  // Tage zwischen zwei Kalendertagen, unabhängig von Sommer/Winterzeit
+  function muellTagNr(d) {
+    return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  function muellDatumAusKey(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Liefert { 'yyyy-mm-dd': Set(tonnenIds) } für den Zeitraum [start, ende]
+  async function muellTermine(start, ende) {
+    const result = {};
+    const add = (date, id) => {
+      const k = localDateKey(date);
+      (result[k] = result[k] || new Set()).add(id);
+    };
+    const s = muellTagNr(start), e = muellTagNr(ende);
+
+    // 1. Aus dem eingestellten Rhythmus berechnen
+    MUELL_TONNEN.forEach((t) => {
+      const cfg = muellPlan.tonnen[t.id];
+      if (!cfg || !cfg.rhythmus || !cfg.datum) return;
+      const anker = muellTagNr(muellDatumAusKey(cfg.datum));
+      const schritt = cfg.rhythmus * 7;
+      for (let n = s; n <= e; n++) {
+        if ((((n - anker) % schritt) + schritt) % schritt === 0) add(addDays(start, n - s), t.id);
+      }
+    });
+
+    // 2. Aus Kalenderterminen erkennen
+    try {
+      const events = await loadCalendarEvents();
+      events.forEach((ev) => {
+        const n = muellTagNr(ev.date);
+        if (n < s || n > e) return;
+        const titel = String(ev.title || '');
+        MUELL_TONNEN.forEach((t) => { if (t.muster.test(titel)) add(ev.date, t.id); });
+      });
+    } catch (err) {}
+
+    return result;
+  }
+
+  async function renderMuellplan() {
+    const strip = document.getElementById('muellStrip');
+    const box = document.getElementById('muellBox');
+    try {
+      const res = await window.storage.get('household:muellplan', true);
+      if (res && res.value) muellPlan = JSON.parse(res.value) || { tonnen: {} };
+      if (!muellPlan.tonnen) muellPlan.tonnen = {};
+    } catch (err) {}
+
+    const heute = new Date();
+    heute.setHours(0, 0, 0, 0);
+    const montag = addDays(heute, -((heute.getDay() + 6) % 7));
+    const sonntagNaechste = addDays(montag, 13);
+    const termine = await muellTermine(montag, sonntagNaechste);
+    const tonneById = {};
+    MUELL_TONNEN.forEach((t) => { tonneById[t.id] = t; });
+    const heuteNr = muellTagNr(heute);
+
+    // Tage einer Woche (0 = diese, 1 = nächste) mit Abholung
+    const wocheTage = (w) => {
+      const tage = [];
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(montag, w * 7 + i);
+        const ids = termine[localDateKey(d)];
+        if (!ids || ids.size === 0) continue;
+        const nr = muellTagNr(d);
+        const status = nr < heuteNr ? 'vorbei' : nr === heuteNr ? 'heute' : nr === heuteNr + 1 ? 'morgen' : '';
+        const tonnen = MUELL_TONNEN.filter((t) => ids.has(t.id));
+        tage.push({ d, status, tonnen });
+      }
+      return tage;
+    };
+    const wochen = [wocheTage(0), wocheTage(1)];
+    const nichtsEingestellt = Object.keys(termine).length === 0 &&
+      !MUELL_TONNEN.some((t) => muellPlan.tonnen[t.id] && muellPlan.tonnen[t.id].rhythmus);
+    const wtag = (d) => d.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '');
+    const dot = (t) => `<span class="muell-dot" style="background:${t.farbe}"></span>`;
+
+    // Kompakte Leiste neben der Überschrift
+    if (strip) {
+      if (nichtsEingestellt) {
+        strip.innerHTML = '<span class="muell-setup">🗑️ Müllplan einrichten</span>';
+      } else {
+        strip.innerHTML = ['🗑️ Diese', 'Nächste'].map((label, w) => {
+          // Erledigte Tage hier weglassen, damit die kommenden Abholungen Platz haben
+          const chips = wochen[w].filter((tag) => tag.status !== 'vorbei').flatMap((tag) => tag.tonnen.map((t) => {
+            const tagText = tag.status === 'heute' ? 'Heute' : tag.status === 'morgen' ? 'Morgen' : wtag(tag.d);
+            return `<span class="muell-chip ${tag.status}" title="${t.name}">${dot(t)}${tagText} ${t.kurz}</span>`;
+          })).join('');
+          return `<span class="muell-label">${label}</span><div class="muell-chips">${chips || '<span class="muell-none">keine Abholung</span>'}</div>`;
+        }).join('');
+      }
+    }
+
+    // Ausführliche Liste im Kalenderfeld
+    if (box) {
+      let html = '<div class="muell-box-title"><span>🗑️ Müllabfuhr</span><span class="muell-box-edit">einstellen ›</span></div>';
+      if (nichtsEingestellt) {
+        html += '<div class="muell-box-day" style="color:#8A8069;">Antippen, um die Abholtage der Tonnen einzutragen.</div>';
+      } else {
+        ['Diese Woche', 'Nächste Woche'].forEach((label, w) => {
+          html += `<div class="muell-box-week">${label}</div>`;
+          if (wochen[w].length === 0) {
+            html += '<div class="muell-box-day" style="color:#9B9280;">Keine Abholung</div>';
+          }
+          wochen[w].forEach((tag) => {
+            const datum = tag.status === 'heute' ? 'Heute' : tag.status === 'morgen' ? 'Morgen'
+              : `${wtag(tag.d)} ${tag.d.getDate()}.${tag.d.getMonth() + 1}.`;
+            const typen = tag.tonnen.map((t) => `<span class="muell-box-type">${dot(t)}${t.name}</span>`).join('');
+            html += `<div class="muell-box-day ${tag.status}"><span class="muell-box-date">${datum}</span><span class="muell-box-types">${typen}</span></div>`;
+          });
+        });
+      }
+      box.innerHTML = html;
+    }
+  }
+
+  // Einstellungsdialog
+  function openMuellDialog() {
+    const rows = document.getElementById('muellRows');
+    const opt = (v, txt, cur) => `<option value="${v}"${Number(cur) === v ? ' selected' : ''}>${txt}</option>`;
+    rows.innerHTML = MUELL_TONNEN.map((t) => {
+      const cfg = muellPlan.tonnen[t.id] || {};
+      const r = cfg.rhythmus || 0;
+      return `<div class="muell-row" data-id="${t.id}">
+        <span class="muell-row-name"><span class="muell-dot" style="background:${t.farbe}; width:16px; height:16px;"></span>${t.name}</span>
+        <select class="muell-rhythmus">
+          ${opt(0, 'keine', r)}${opt(1, 'jede Woche', r)}${opt(2, 'alle 2 Wochen', r)}${opt(3, 'alle 3 Wochen', r)}${opt(4, 'alle 4 Wochen', r)}
+        </select>
+        <input type="date" class="muell-datum" value="${cfg.datum || ''}" ${r ? '' : 'disabled'} title="Ein bekannter Abholtag" />
+      </div>`;
+    }).join('');
+    rows.querySelectorAll('.muell-row').forEach((row) => {
+      const sel = row.querySelector('.muell-rhythmus');
+      const inp = row.querySelector('.muell-datum');
+      sel.addEventListener('change', () => {
+        inp.disabled = sel.value === '0';
+        if (!inp.disabled && !inp.value) inp.value = localDateKey(new Date());
+      });
+    });
+    document.getElementById('muellOverlay').classList.remove('hidden');
+  }
+  function closeMuellDialog() {
+    document.getElementById('muellOverlay').classList.add('hidden');
+  }
+  document.getElementById('muellStrip').addEventListener('click', openMuellDialog);
+  document.getElementById('muellBox').addEventListener('click', openMuellDialog);
+  document.getElementById('muellCancelBtn').addEventListener('click', closeMuellDialog);
+  document.getElementById('muellOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'muellOverlay') closeMuellDialog();
+  });
+  document.getElementById('muellSaveBtn').addEventListener('click', async () => {
+    const tonnen = {};
+    document.querySelectorAll('#muellRows .muell-row').forEach((row) => {
+      const rhythmus = Number(row.querySelector('.muell-rhythmus').value) || 0;
+      const datum = row.querySelector('.muell-datum').value;
+      if (rhythmus && datum) tonnen[row.dataset.id] = { rhythmus, datum };
+    });
+    muellPlan = { tonnen };
+    closeMuellDialog();
+    try {
+      await window.storage.set('household:muellplan', JSON.stringify(muellPlan), true);
+    } catch (err) {
+      alert('Müllplan konnte nicht gespeichert werden.');
+    }
+    await renderMuellplan();
+  });
+
   // Initialisierung
   (async function init() {
     initRegenradar();
     await loadTemperature();
     await renderCalendar();
+    await renderMuellplan();
     await loadHVVData();
     await syncCalendarTasks();
     await updateActionsOverview();
@@ -2263,6 +2592,7 @@
     setInterval(async () => {
       await loadTemperature();
       await renderCalendar();
+      await renderMuellplan();
       await loadHVVData();
       await syncCalendarTasks();
       await updateActionsOverview();
