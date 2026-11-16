@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Websites" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#1F2A36" />
+  <title>Meine Websites</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141B23;
+      --card: #1F2A36;
+      --card-hover: #283646;
+      --line: #2F3E4F;
+      --text: #EEF2F6;
+      --muted: #8E9BAA;
+      --accent: #4C9BD6;
+      --accent-dark: #3A82B8;
+      --danger: #E07A5F;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+    body { min-height: 100vh; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: max(20px, env(safe-area-inset-top)) 16px 12px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    h1 { font-size: 1.6rem; margin: 0; font-weight: 700; }
+    .btn {
+      font-family: inherit; font-size: 0.95rem; font-weight: 600;
+      border: none; border-radius: 10px; padding: 10px 16px; cursor: pointer;
+      background: var(--accent); color: #fff; white-space: nowrap;
+    }
+    .btn:active { background: var(--accent-dark); }
+    .btn.ghost { background: transparent; color: var(--muted); }
+    .btn.small { padding: 8px 12px; font-size: 0.85rem; }
+    main { max-width: 1100px; margin: 0 auto; padding: 4px 16px 32px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .tile {
+      position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+      cursor: pointer; text-align: center; min-width: 0;
+      font-family: inherit; color: inherit;
+    }
+    .tile:hover { background: var(--card-hover); }
+    .tile-icon {
+      width: 56px; height: 56px; border-radius: 14px; background: #fff;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      font-size: 1.5rem; font-weight: 700; color: var(--bg);
+    }
+    .tile-icon img { width: 36px; height: 36px; }
+    .tile-name { font-weight: 600; font-size: 0.95rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tile-host { font-size: 0.72rem; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: -6px; }
+    .tile-del {
+      position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 8px;
+      border: none; background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer;
+      display: none;
+    }
+    body.editing .tile-del { display: block; }
+    body.editing .tile { border-style: dashed; }
+    .tile-del:active { background: var(--line); color: var(--danger); }
+
+    .empty { text-align: center; color: var(--muted); padding: 60px 16px; line-height: 1.5; }
+
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .hidden { display: none !important; }
+    .dialog {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+      width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .dialog h2 { margin: 0 0 4px; font-size: 1.2rem; }
+    .input {
+      width: 100%; font-family: inherit; font-size: 1rem; padding: 12px 14px;
+      border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); outline: none;
+    }
+    .input:focus { border-color: var(--accent); }
+    .error { color: var(--danger); font-size: 0.82rem; min-height: 1em; margin: 0; }
+    .actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+    .viewer { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
+    .viewer-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: max(10px, env(safe-area-inset-top)) 12px 10px; background: var(--card); border-bottom: 1px solid var(--line);
+    }
+    .viewer-title { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .viewer-bar a { text-decoration: none; }
+    .viewer-hint { margin: 0; padding: 6px 12px; font-size: 0.75rem; color: var(--muted); background: var(--card); }
+    .viewer iframe { flex: 1; width: 100%; border: none; background: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Meine Websites</h1>
+    <div style="display:flex; gap:8px;">
+      <button class="btn ghost small" id="editBtn" type="button">Bearbeiten</button>
+      <button class="btn small" id="addBtn" type="button">＋ Hinzufügen</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="grid"></div>
+    <div class="empty hidden" id="empty">Noch keine Websites gespeichert.<br>Tippe auf „＋ Hinzufügen“.</div>
+  </main>
+
+  <!-- Website hinzufügen -->
+  <div class="overlay hidden" id="addOverlay">
+    <form class="dialog" id="addForm" autocomplete="off">
+      <h2>Website hinzufügen</h2>
+      <input class="input" id="nameInput" type="text" placeholder="Name (z. B. Jellyfin)" maxlength="40" />
+      <input class="input" id="urlInput" type="text" placeholder="Adresse, z. B. jellyfin.local:8096" inputmode="url" autocapitalize="off" spellcheck="false" />
+      <p class="error" id="addError"></p>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="addCancel">Abbrechen</button>
+        <button class="btn" type="submit">Speichern</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Vollbild Ansicht -->
+  <div class="viewer hidden" id="viewer">
+    <div class="viewer-bar">
+      <span class="viewer-title" id="viewerTitle"></span>
+      <a class="btn small" id="viewerExternal" href="#" target="_blank" rel="noopener noreferrer">↗ Neuer Tab</a>
+      <button class="btn small" type="button" id="viewerClose">✕</button>
+    </div>
+    <p class="viewer-hint">Bleibt die Seite leer, erlaubt sie keine Einbettung. Dann über „Neuer Tab“ öffnen.</p>
+    <iframe id="viewerFrame" title="Website" referrerpolicy="no-referrer" allow="fullscreen; autoplay; picture-in-picture"></iframe>
+  </div>
+
+  <script>
+  (function () {
+    var KEY = 'meineWebsites';
+    var $ = function (id) { return document.getElementById(id); };
+
+    function load() {
+      try { var v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; }
+      catch (e) { return []; }
+    }
+    function save(list) {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    }
+    function normalize(raw) {
+      raw = (raw || '').trim();
+      if (!raw) return null;
+      if (!/^[a-z]+:\/\//i.test(raw)) raw = 'https://' + raw;
+      try {
+        var u = new URL(raw);
+        return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : null;
+      } catch (e) { return null; }
+    }
+    function host(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return url; }
+    }
+
+    function render() {
+      var list = load(), grid = $('grid');
+      grid.innerHTML = '';
+      $('empty').classList.toggle('hidden', list.length > 0);
+      $('editBtn').classList.toggle('hidden', list.length === 0);
+      if (!list.length) document.body.classList.remove('editing');
+
+      list.forEach(function (site, idx) {
+        var tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.setAttribute('role', 'button');
+        tile.tabIndex = 0;
+
+        var icon = document.createElement('div');
+        icon.className = 'tile-icon';
+        icon.textContent = (site.name || '?').charAt(0).toUpperCase();
+        var img = new Image();
+        img.alt = '';
+        img.onload = function () { icon.textContent = ''; icon.appendChild(img); };
+        img.src = new URL('/favicon.ico', site.url).href;
+
+        var name = document.createElement('span');
+        name.className = 'tile-name';
+        name.textContent = site.name;
+        var h = document.createElement('span');
+        h.className = 'tile-host';
+        h.textContent = host(site.url);
+
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'tile-del';
+        del.title = 'Entfernen';
+        del.textContent = '✕';
+        del.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (!confirm('„' + site.name + '“ entfernen?')) return;
+          var l = load(); l.splice(idx, 1); save(l); render();
+        });
+
+        tile.appendChild(del);
+        tile.appendChild(icon);
+        tile.appendChild(name);
+        tile.appendChild(h);
+        tile.addEventListener('click', function () {
+          if (!document.body.classList.contains('editing')) openViewer(site);
+        });
+        tile.addEventListener('keydown', function (e) { if (e.key === 'Enter') tile.click(); });
+        grid.appendChild(tile);
+      });
+    }
+
+    function openViewer(site) {
+      $('viewerTitle').textContent = site.name;
+      $('viewerExternal').href = site.url;
+      $('viewerFrame').src = site.url;
+      $('viewer').classList.remove('hidden');
+    }
+    function closeViewer() {
+      $('viewer').classList.add('hidden');
+      $('viewerFrame').src = 'about:blank';
+    }
+    function closeAdd() { $('addOverlay').classList.add('hidden'); }
+
+    $('addBtn').addEventListener('click', function () {
+      $('addError').textContent = '';
+      $('addOverlay').classList.remove('hidden');
+      $('nameInput').focus();
+    });
+    $('addCancel').addEventListener('click', closeAdd);
+    $('addOverlay').addEventListener('click', function (e) { if (e.target === this) closeAdd(); });
+    $('editBtn').addEventListener('click', function () {
+      var on = document.body.classList.toggle('editing');
+      this.textContent = on ? 'Fertig' : 'Bearbeiten';
+    });
+    $('viewerClose').addEventListener('click', closeViewer);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeViewer(); closeAdd(); }
+    });
+
+    $('addForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var url = normalize($('urlInput').value);
+      if (!url) { $('addError').textContent = 'Bitte eine gültige Adresse eingeben.'; return; }
+      var name = $('nameInput').value.trim() || host(url);
+      var list = load();
+      list.push({ name: name, url: url });
+      save(list);
+      $('nameInput').value = '';
+      $('urlInput').value = '';
+      closeAdd();
+      render();
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>
