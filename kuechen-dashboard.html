@@ -821,7 +821,7 @@
       <div class="calendar-events" id="calendarEvents"></div>
       <div class="last-update" id="calendarUpdate"></div>
       <!-- Versionsnummer: bei jeder Aenderung erhoehen (kleine Aenderung +0.1, grosser Umbau naechste ganze Zahl) und Datum anpassen -->
-      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.10 · 11.11.2026</div>
+      <div class="last-update" id="dashboardVersion" style="margin-top:2px;">Version 1.11 · 12.11.2026</div>
     </div>
 
     <!-- Wetter/Radar -->
@@ -2354,13 +2354,14 @@
   // { tonnen: { rest: { rhythmus: 2, datum: 'yyyy-mm-dd' }, ... } }
   // rhythmus = Abstand in Wochen (0 = keine Abholung), datum = irgendein bekannter Abholtag als Anker.
   // Zusätzlich werden Termine aus der ICS Datei per Stichwort erkannt (z.B. Abfallkalender der Stadt).
+  // Die Stichwörter müssen am Wortanfang stehen, damit z.B. "Mottenpapier" nicht als Papiertonne zählt.
   const MUELL_TONNEN = [
-    { id: 'rest',   name: 'Restmüll',    kurz: 'Rest',   farbe: '#4A4A48', muster: /rest\s*(müll|muell|abfall)|graue tonne|schwarze tonne|hausmüll/i },
-    { id: 'bio',    name: 'Biotonne',    kurz: 'Bio',    farbe: '#8B5A2B', muster: /bio\s*(müll|muell|abfall|tonne)|braune tonne|grünabfall/i },
-    { id: 'papier', name: 'Papier',      kurz: 'Papier', farbe: '#2F6DB5', muster: /papier|pappe|blaue tonne/i },
-    { id: 'gelb',   name: 'Gelbe Tonne', kurz: 'Gelb',   farbe: '#E8C21C', muster: /gelbe?[rn]?\s*(sack|säcke|tonne)|wertstoff|verpackung/i },
-    { id: 'glas',   name: 'Glas',        kurz: 'Glas',   farbe: '#3E8E5A', muster: /altglas|glas\s*(container|tonne)/i },
-    { id: 'sperr',  name: 'Sperrmüll',   kurz: 'Sperr',  farbe: '#B0662F', muster: /sperr\s*(müll|muell)/i },
+    { id: 'rest',   name: 'Restmüll',    kurz: 'Rest',   farbe: '#4A4A48', muster: /(^|[^a-zäöüß])(rest\s*(müll|muell|abfall)|graue tonne|schwarze tonne|hausmüll)/i },
+    { id: 'bio',    name: 'Biotonne',    kurz: 'Bio',    farbe: '#8B5A2B', muster: /(^|[^a-zäöüß])(bio\s*(müll|muell|abfall|tonne)|braune tonne|grünabfall)/i },
+    { id: 'papier', name: 'Papier',      kurz: 'Papier', farbe: '#2F6DB5', muster: /(^|[^a-zäöüß])((alt)?papier(tonne|müll|muell|abfall)?|pappe|blaue tonne)($|[^a-zäöüß])/i },
+    { id: 'gelb',   name: 'Gelbe Tonne', kurz: 'Gelb',   farbe: '#E8C21C', muster: /(^|[^a-zäöüß])(gelbe?[rn]?\s*(sack|säcke|tonne)|wertstoff)/i },
+    { id: 'glas',   name: 'Glas',        kurz: 'Glas',   farbe: '#3E8E5A', muster: /(^|[^a-zäöüß])(altglas|glas\s*(container|tonne))/i },
+    { id: 'sperr',  name: 'Sperrmüll',   kurz: 'Sperr',  farbe: '#B0662F', muster: /(^|[^a-zäöüß])sperr\s*(müll|muell)/i },
   ];
   let muellPlan = { tonnen: {} };
 
